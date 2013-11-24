@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Ordboken</string>
+
+    <string name="menu_logout">Logga ut</string>
+    <string name="menu_search">Sök</string>
+
+    <string name="search_hint">Sök i ordboken</string>
+
+    <string name="sign_in_info">Logga in med ditt NE.se konto.</string>
+    <string name="sign_in">Logga in</string>
+    <string name="prompt_email">E-post</string>
+    <string name="prompt_password">Lösenord</string>
+    <string name="signing_in">Loggar in&#8230;</string>
+
+    <string name="loading">Laddar&#8230;</string>
+
+    <string name="error_login_failed">Inloggning misslyckades.</string>
+    <string name="error_offline">Ingen anslutning.</string>
+    <string name="error_results">Hämntning misslyckades.</string>
+    <string name="error_word">Hämntning misslyckades.</string>
+    <string name="error_audio">Ljuduppspelning misslyckades.</string>
+    <string name="no_results">Inga resultat hittades.</string>
+
+</resources>
