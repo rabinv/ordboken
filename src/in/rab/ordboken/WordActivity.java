@@ -16,11 +16,8 @@
 
 package in.rab.ordboken;
 
-import in.rab.ordboken.NeClient.LoginException;
 import in.rab.ordboken.NeClient.NeWord;
-import in.rab.ordboken.NeClient.ParserException;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -151,27 +148,21 @@ public class WordActivity extends Activity {
 	}
 
 	private class AudioTask extends AsyncTask<Void, Void, String> {
-		private String mError;
-
 		@Override
 		protected String doInBackground(Void... params) {
 			try {
 				mOrdboken.initCookies();
 				return mOrdboken.getNeClient().getAudioUrl(mWord);
-			} catch (LoginException e) {
-				mError = e.getMessage();
-			} catch (IOException e) {
-				mError = e.getMessage();
-			} catch (ParserException e) {
-				mError = e.getMessage();
+			} catch (Exception e) {
+				return null;
 			}
-			return null;
 		}
 
 		@Override
 		protected void onPostExecute(String audioUrl) {
 			if (audioUrl == null) {
-				Toast.makeText(getApplicationContext(), mError, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), R.string.error_audio, Toast.LENGTH_SHORT)
+						.show();
 				return;
 			}
 
