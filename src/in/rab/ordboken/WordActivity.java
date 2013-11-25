@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
@@ -33,6 +34,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
@@ -58,6 +60,12 @@ public class WordActivity extends Activity {
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		mWebView = (WebView) findViewById(R.id.webView);
+		WebSettings settings = mWebView.getSettings();
+
+		settings.setBuiltInZoomControls(true);
+		settings.setDisplayZoomControls(false);
+
+		mWebView.setInitialScale(mOrdboken.mPrefs.getInt("scale", 100));
 		mWebView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -192,7 +200,15 @@ public class WordActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		mOrdboken.getPrefsEditor().commit();
+
+		// getScale() is supposed to be deprecated, but its replacement
+		// onScaleChanged() doesn't get called when zooming using pinch.
+		@SuppressWarnings("deprecation")
+		int scale = (int) (mWebView.getScale() * 100);
+
+		SharedPreferences.Editor ed = mOrdboken.getPrefsEditor();
+		ed.putInt("scale", scale);
+		ed.commit();
 	}
 
 	@Override
