@@ -47,9 +47,6 @@ public class Ordboken {
 	private Ordboken(Context context) {
 		mContext = context;
 
-		// Attempt to prevent some wierd EOFexceptions during token refresh
-		System.setProperty("http.keepAlive", "false");
-
 		try {
 			// Ends up only fully caching the search results. Documents use ETag
 			// and are conditionally cached.
