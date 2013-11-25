@@ -41,7 +41,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class WordActivity extends Activity {
-	private WebView webView;
+	private WebView mWebView;
 	private Ordboken mOrdboken;
 	private NeWord mWord;
 	private String mTitle;
@@ -57,8 +57,8 @@ public class WordActivity extends Activity {
 		setContentView(R.layout.activity_word);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-		webView = (WebView) findViewById(R.id.webView);
-		webView.setWebViewClient(new WebViewClient() {
+		mWebView = (WebView) findViewById(R.id.webView);
+		mWebView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
 				if (url.indexOf("/playAudio") != -1) {
@@ -134,11 +134,11 @@ public class WordActivity extends Activity {
 						.replace("</object>", "</object><a class='sound' href='/playAudio'></a>");
 			}
 
-			webView.loadDataWithBaseURL("http://api.ne.se/", header + text, "text/html", "UTF-8",
+			mWebView.loadDataWithBaseURL("http://api.ne.se/", header + text, "text/html", "UTF-8",
 					null);
 			setTitle(result.mTitle);
 			mStatusLayout.setVisibility(View.GONE);
-			webView.setVisibility(View.VISIBLE);
+			mWebView.setVisibility(View.VISIBLE);
 		}
 	}
 
