@@ -16,6 +16,7 @@
 
 package in.rab.ordboken;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,7 +36,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.net.Uri;
-import android.text.TextUtils;
 
 public class NeClient {
 	private String mRefreshToken;
@@ -165,6 +165,42 @@ public class NeClient {
 		return str;
 	}
 
+	private void loginMainSite() throws IOException, LoginException {
+		ArrayList<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
+
+		data.add(new BasicNameValuePair("_save_loginForm", "true"));
+		data.add(new BasicNameValuePair("redir", "/success"));
+		data.add(new BasicNameValuePair("redirFail", "/fail"));
+		data.add(new BasicNameValuePair("userName", mUsername));
+		data.add(new BasicNameValuePair("passWord", mPassword));
+
+		UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data);
+
+		URL url = new URL("https://www.ne.se/user/login.jsp");
+		HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
+		https.setInstanceFollowRedirects(false);
+		https.setFixedLengthStreamingMode((int) entity.getContentLength());
+		https.setDoOutput(true);
+
+		try {
+			OutputStream output = https.getOutputStream();
+			entity.writeTo(output);
+			output.close();
+
+			Integer response = https.getResponseCode();
+			if (response != 302) {
+				throw new LoginException("Unexpected response: " + response);
+			}
+
+			String location = https.getHeaderField("Location");
+			if (location.indexOf("/success") == -1) {
+				throw new LoginException("Failed to login");
+			}
+		} finally {
+			https.disconnect();
+		}
+	}
+
 	private String fetchMainSitePage(String pageUrl) throws IOException, LoginException,
 			ParserException {
 		URL url = new URL(pageUrl);
@@ -184,42 +220,11 @@ public class NeClient {
 		if (response == 302) {
 			urlConnection.disconnect();
 
-			if (TextUtils.isEmpty(mUsername) || TextUtils.isEmpty(mPassword)) {
-				throw new LoginException("Credentials not saved");
-			}
-
-			ArrayList<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
-
-			data.add(new BasicNameValuePair("_save_loginForm", "true"));
-			data.add(new BasicNameValuePair("redir", "/success"));
-			data.add(new BasicNameValuePair("redirFail", "/fail"));
-			data.add(new BasicNameValuePair("userName", mUsername));
-			data.add(new BasicNameValuePair("passWord", mPassword));
-
-			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data);
-
-			url = new URL("https://www.ne.se/user/login.jsp");
-			HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
-			https.setInstanceFollowRedirects(false);
-			https.setFixedLengthStreamingMode((int) entity.getContentLength());
-			https.setDoOutput(true);
-
 			try {
-				OutputStream output = https.getOutputStream();
-				entity.writeTo(output);
-				output.close();
-
-				response = https.getResponseCode();
-				if (response != 302) {
-					throw new LoginException("Unexpected response: " + response);
-				}
-
-				String location = https.getHeaderField("Location");
-				if (location.indexOf("/success") == -1) {
-					throw new LoginException("Failed to login");
-				}
-			} finally {
-				https.disconnect();
+				loginMainSite();
+			} catch (EOFException e) {
+				// Same EOFException as on token refreshes. Seems to be a POST thing.
+				loginMainSite();
 			}
 
 			url = new URL(pageUrl);
@@ -397,7 +402,13 @@ public class NeClient {
 		data.add(new BasicNameValuePair("grant_type", "refresh_token"));
 		data.add(new BasicNameValuePair("refresh_token", mRefreshToken));
 
-		return requestToken(data);
+		try {
+			return requestToken(data);
+		} catch (EOFException e) {
+			// For some reason, EOFException is raised on some token refreshes.
+			// Needs to be investigated further.
+			return requestToken(data);
+		}
 	}
 
 	public boolean login(String userName, String password) throws IOException {
