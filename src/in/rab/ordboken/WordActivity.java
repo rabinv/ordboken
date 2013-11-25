@@ -201,13 +201,19 @@ public class WordActivity extends Activity {
 	protected void onPause() {
 		super.onPause();
 
-		// getScale() is supposed to be deprecated, but its replacement
-		// onScaleChanged() doesn't get called when zooming using pinch.
-		@SuppressWarnings("deprecation")
-		int scale = (int) (mWebView.getScale() * 100);
-
 		SharedPreferences.Editor ed = mOrdboken.getPrefsEditor();
-		ed.putInt("scale", scale);
+
+		// If the WebView was not made visible, getScale() does not
+		// return the initalScale, but the default one.
+		if (mWebView.getVisibility() == View.VISIBLE) {
+			// getScale() is supposed to be deprecated, but its replacement
+			// onScaleChanged() doesn't get called when zooming using pinch.
+			@SuppressWarnings("deprecation")
+			int scale = (int) (mWebView.getScale() * 100);
+
+			ed.putInt("scale", scale);
+		}
+
 		ed.commit();
 	}
 
