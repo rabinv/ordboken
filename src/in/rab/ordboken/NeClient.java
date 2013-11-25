@@ -419,6 +419,11 @@ public class NeClient {
 		data.add(new BasicNameValuePair("username", userName));
 		data.add(new BasicNameValuePair("password", password));
 
-		return requestToken(data);
+		try {
+			return requestToken(data);
+		} catch (EOFException e) {
+			// Never seen it here but doesn't hurt.
+			return requestToken(data);
+		}
 	}
 }
