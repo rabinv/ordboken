@@ -172,8 +172,18 @@ public class NeClient {
 		urlConnection.setInstanceFollowRedirects(false);
 		urlConnection.connect();
 
-		int response = urlConnection.getResponseCode();
+		int response;
+
+		try {
+			response = urlConnection.getResponseCode();
+		} catch (IOException e) {
+			urlConnection.disconnect();
+			throw e;
+		}
+
 		if (response == 302) {
+			urlConnection.disconnect();
+
 			if (TextUtils.isEmpty(mUsername) || TextUtils.isEmpty(mPassword)) {
 				throw new LoginException("Credentials not saved");
 			}
@@ -194,18 +204,22 @@ public class NeClient {
 			https.setFixedLengthStreamingMode((int) entity.getContentLength());
 			https.setDoOutput(true);
 
-			OutputStream output = https.getOutputStream();
-			entity.writeTo(output);
-			output.close();
+			try {
+				OutputStream output = https.getOutputStream();
+				entity.writeTo(output);
+				output.close();
 
-			response = https.getResponseCode();
-			if (response != 302) {
-				throw new LoginException("Unexpected response: " + response);
-			}
+				response = https.getResponseCode();
+				if (response != 302) {
+					throw new LoginException("Unexpected response: " + response);
+				}
 
-			String location = https.getHeaderField("Location");
-			if (location.indexOf("/success") == -1) {
-				throw new LoginException("Failed to login");
+				String location = https.getHeaderField("Location");
+				if (location.indexOf("/success") == -1) {
+					throw new LoginException("Failed to login");
+				}
+			} finally {
+				https.disconnect();
 			}
 
 			url = new URL(pageUrl);
@@ -213,14 +227,23 @@ public class NeClient {
 			urlConnection.setInstanceFollowRedirects(false);
 			urlConnection.connect();
 
-			response = urlConnection.getResponseCode();
+			try {
+				response = urlConnection.getResponseCode();
+			} catch (IOException e) {
+				urlConnection.disconnect();
+				throw e;
+			}
 		}
 
-		if (response != 200) {
-			throw new ParserException("Unable to get page: " + response);
-		}
+		try {
+			if (response != 200) {
+				throw new ParserException("Unable to get page: " + response);
+			}
 
-		return inputStreamToString(urlConnection.getInputStream());
+			return inputStreamToString(urlConnection.getInputStream());
+		} finally {
+			urlConnection.disconnect();
+		}
 	}
 
 	public NeSearchResult[] fetchSearchResults(String query) throws ParserException, IOException {
@@ -262,11 +285,15 @@ public class NeClient {
 		urlConnection.addRequestProperty("Accept", "application/json");
 		urlConnection.connect();
 
-		if (urlConnection.getResponseCode() != 200) {
-			throw new ParserException("Unexpected response: " + urlConnection.getResponseCode());
-		}
+		try {
+			if (urlConnection.getResponseCode() != 200) {
+				throw new ParserException("Unexpected response: " + urlConnection.getResponseCode());
+			}
 
-		return new JSONObject(inputStreamToString(urlConnection.getInputStream()));
+			return new JSONObject(inputStreamToString(urlConnection.getInputStream()));
+		} finally {
+			urlConnection.disconnect();
+		}
 	}
 
 	private JSONObject privateApiRequest(String requestUrl) throws IOException, LoginException,
@@ -281,7 +308,18 @@ public class NeClient {
 		urlConnection.addRequestProperty("Accept", "application/json");
 		urlConnection.connect();
 
-		if (urlConnection.getResponseCode() == 401) {
+		int resp;
+
+		try {
+			resp = urlConnection.getResponseCode();
+		} catch (IOException e) {
+			urlConnection.disconnect();
+			throw e;
+		}
+
+		if (resp == 401) {
+			urlConnection.disconnect();
+
 			if (!authenticate()) {
 				throw new LoginException("Login required");
 			}
@@ -292,14 +330,20 @@ public class NeClient {
 			urlConnection.connect();
 		}
 
-		if (urlConnection.getResponseCode() == 401) {
-			throw new LoginException("Login required");
-		}
+		try {
+			if (urlConnection.getResponseCode() == 401) {
+				throw new LoginException("Login required");
+			}
 
-		return new JSONObject(inputStreamToString(urlConnection.getInputStream()));
+			return new JSONObject(inputStreamToString(urlConnection.getInputStream()));
+		} finally {
+			urlConnection.disconnect();
+		}
 	}
 
 	private boolean requestToken(ArrayList<BasicNameValuePair> data) throws IOException {
+		String page;
+
 		URL url = new URL("https://www.ne.se/oauth/token");
 		UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data);
 
@@ -309,16 +353,20 @@ public class NeClient {
 		urlConnection.setFixedLengthStreamingMode((int) entity.getContentLength());
 		urlConnection.setDoOutput(true);
 
-		OutputStream output = urlConnection.getOutputStream();
-		entity.writeTo(output);
-		output.close();
+		try {
+			OutputStream output = urlConnection.getOutputStream();
+			entity.writeTo(output);
+			output.close();
 
-		int response = urlConnection.getResponseCode();
-		if (response != 200) {
-			return false;
+			int response = urlConnection.getResponseCode();
+			if (response != 200) {
+				return false;
+			}
+
+			page = inputStreamToString(urlConnection.getInputStream());
+		} finally {
+			urlConnection.disconnect();
 		}
-
-		String page = inputStreamToString(urlConnection.getInputStream());
 
 		try {
 			JSONObject json = new JSONObject(page);
