@@ -18,8 +18,8 @@
 
     <string name="error_login_failed">Inloggning misslyckades.</string>
     <string name="error_offline">Ingen anslutning.</string>
-    <string name="error_results">Hämntning misslyckades.</string>
-    <string name="error_word">Hämntning misslyckades.</string>
+    <string name="error_results">Hämtning misslyckades.</string>
+    <string name="error_word">Hämtning misslyckades.</string>
     <string name="error_audio">Ljuduppspelning misslyckades.</string>
     <string name="no_results">Inga resultat hittades.</string>
 
