@@ -102,6 +102,7 @@ public class NeClient {
 		public final String mTitle;
 		public final String mText;
 		public final String mSlug;
+		public final String mUrl;
 		public final boolean mHasAudio;
 
 		private String mAudioUrl;
@@ -114,7 +115,8 @@ public class NeClient {
 			this.mAudioUrl = mAudioUrl;
 		}
 
-		public NeWord(JSONObject json) throws JSONException {
+		public NeWord(String url, JSONObject json) throws JSONException {
+			mUrl = url;
 			mTitle = json.getString("title");
 			mSlug = json.getString("slug");
 			mText = json.getString("text");
@@ -277,7 +279,7 @@ public class NeClient {
 
 	public NeWord fetchWord(String wordUrl) throws LoginException, ParserException, IOException {
 		try {
-			return new NeWord(privateApiRequest(wordUrl));
+			return new NeWord(wordUrl, privateApiRequest(wordUrl));
 		} catch (JSONException e) {
 			throw new ParserException(e.getMessage());
 		}
