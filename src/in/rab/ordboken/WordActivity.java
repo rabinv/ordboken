@@ -114,6 +114,7 @@ public class WordActivity extends Activity {
 		@Override
 		protected void onPostExecute(NeWord result) {
 			mWord = result;
+			mOrdboken.setLastWord(mWord);
 
 			if (result == null) {
 				mProgressBar.setVisibility(View.GONE);
@@ -189,9 +190,16 @@ public class WordActivity extends Activity {
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		mOrdboken.setLastWord(mWord);
+	}
+
+	@Override
 	protected void onPause() {
 		super.onPause();
 
+		mOrdboken.setLastWord(null);
 		SharedPreferences.Editor ed = mOrdboken.getPrefsEditor();
 
 		// If the WebView was not made visible, getScale() does not
@@ -210,7 +218,7 @@ public class WordActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		return mOrdboken.initSearchView(this, menu, mTitle, false);
+		return mOrdboken.initSearchView(this, menu, null, false);
 	}
 
 	@Override

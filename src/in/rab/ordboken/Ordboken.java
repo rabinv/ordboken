@@ -16,6 +16,8 @@
 
 package in.rab.ordboken;
 
+import in.rab.ordboken.NeClient.NeWord;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.CookieHandler;
@@ -43,6 +45,7 @@ public class Ordboken {
 	private final ConnectivityManager mConnMgr;
 	public final SharedPreferences mPrefs;
 	public SearchView mSearchView;
+	private NeWord mLastWord;
 
 	private Ordboken(Context context) {
 		mContext = context;
@@ -158,5 +161,13 @@ public class Ordboken {
 		}
 
 		return false;
+	}
+
+	public NeWord getLastWord() {
+		return mLastWord;
+	}
+
+	public void setLastWord(NeWord word) {
+		mLastWord = word;
 	}
 }

@@ -17,6 +17,7 @@
 package in.rab.ordboken;
 
 import in.rab.ordboken.NeClient.NeSearchResult;
+import in.rab.ordboken.NeClient.NeWord;
 import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -57,6 +58,11 @@ public class NeSuggestionProvider extends ContentProvider {
 		String q = uri.getLastPathSegment();
 
 		if (q.equals(SearchManager.SUGGEST_URI_PATH_QUERY)) {
+			NeWord lastWord = Ordboken.getInstance(getContext()).getLastWord();
+
+			if (lastWord != null) {
+				cursor.addRow(new Object[] { 0, lastWord.mTitle, "", lastWord.mUrl, lastWord.mTitle });
+			}
 			return cursor;
 		}
 
