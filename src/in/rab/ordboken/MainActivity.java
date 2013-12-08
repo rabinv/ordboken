@@ -83,6 +83,7 @@ public class MainActivity extends ListActivity {
 		intent.putExtra("title", word);
 		intent.putExtra("url", url);
 
+		intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 		startActivity(intent);
 	}
 

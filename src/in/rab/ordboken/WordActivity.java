@@ -208,6 +208,7 @@ public class WordActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		overridePendingTransition(0, 0);
 
 		mOrdboken.setLastWord(null);
 		SharedPreferences.Editor ed = mOrdboken.getPrefsEditor();
