@@ -116,8 +116,6 @@ public class Ordboken {
 	}
 
 	public boolean initSearchView(Activity activity, Menu menu, String query, Boolean expanded) {
-		activity.getMenuInflater().inflate(R.menu.main, menu);
-
 		SearchManager searchManager = (SearchManager) activity
 				.getSystemService(Context.SEARCH_SERVICE);
 		mSearchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();

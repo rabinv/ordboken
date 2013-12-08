@@ -218,6 +218,7 @@ public class WordActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main, menu);
 		return mOrdboken.initSearchView(this, menu, null, false);
 	}
 
