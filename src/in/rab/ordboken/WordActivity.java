@@ -36,10 +36,12 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class WordActivity extends Activity {
+	private static final String FLASHCARD_ACTION = "org.openintents.action.CREATE_FLASHCARD";
 	private WebView mWebView;
 	private Ordboken mOrdboken;
 	private NeWord mWord;
@@ -47,6 +49,7 @@ public class WordActivity extends Activity {
 	private ProgressBar mProgressBar;
 	private TextView mStatusText;
 	private LinearLayout mStatusLayout;
+	private ShareActionProvider mShareActionProvider;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -145,6 +148,13 @@ public class WordActivity extends Activity {
 			setTitle(result.mTitle);
 			mStatusLayout.setVisibility(View.GONE);
 			mWebView.setVisibility(View.VISIBLE);
+
+			if (mShareActionProvider != null) {
+				Intent shareIntent = new Intent(FLASHCARD_ACTION);
+				shareIntent.putExtra("SOURCE_TEXT", result.mTitle);
+				shareIntent.putExtra("TARGET_TEXT", result.mText);
+				mShareActionProvider.setShareIntent(shareIntent);
+			}
 		}
 	}
 
@@ -219,6 +229,13 @@ public class WordActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
+
+		if (getPackageManager().queryIntentActivities(new Intent(FLASHCARD_ACTION), 0).size() > 0) {
+			MenuItem shareItem = menu.findItem(R.id.menu_share);
+			shareItem.setVisible(true);
+			mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
+		}
+
 		return mOrdboken.initSearchView(this, menu, null, false);
 	}
 

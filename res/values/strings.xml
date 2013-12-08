@@ -4,6 +4,7 @@
     <string name="app_name">Ordboken</string>
 
     <string name="menu_logout">Logga ut</string>
+    <string name="menu_share">Dela</string>
     <string name="menu_search">Sök</string>
 
     <string name="search_hint">Sök i ordboken</string>

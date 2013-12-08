@@ -6,6 +6,13 @@
           android:showAsAction="always"
           android:actionViewClass="android.widget.SearchView"
           tools:ignore="AlwaysShowAction" />
+
+    <item android:id="@+id/menu_share"
+          android:title="@string/menu_share"
+          android:showAsAction="ifRoom"
+          android:visible="false"
+          android:actionProviderClass="android.widget.ShareActionProvider" />
+
     <item
         android:id="@+id/menu_logout"
         android:orderInCategory="100"
