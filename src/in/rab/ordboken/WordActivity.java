@@ -148,13 +148,7 @@ public class WordActivity extends Activity {
 			setTitle(result.mTitle);
 			mStatusLayout.setVisibility(View.GONE);
 			mWebView.setVisibility(View.VISIBLE);
-
-			if (mShareActionProvider != null) {
-				Intent shareIntent = new Intent(FLASHCARD_ACTION);
-				shareIntent.putExtra("SOURCE_TEXT", result.mTitle);
-				shareIntent.putExtra("TARGET_TEXT", result.mText);
-				mShareActionProvider.setShareIntent(shareIntent);
-			}
+			updateShareIntent();
 		}
 	}
 
@@ -199,10 +193,27 @@ public class WordActivity extends Activity {
 		}
 	}
 
+	private void updateShareIntent() {
+		if (mShareActionProvider == null) {
+			return;
+		}
+
+		if (mWord != null) {
+			Intent shareIntent = new Intent(FLASHCARD_ACTION);
+			shareIntent.putExtra("SOURCE_TEXT", mWord.mTitle);
+			shareIntent.putExtra("TARGET_TEXT", mWord.mText);
+			mShareActionProvider.setShareIntent(shareIntent);
+		} else {
+			mShareActionProvider.setShareIntent(null);
+		}
+	}
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 		mOrdboken.setLastWord(mWord);
+		updateShareIntent();
+
 	}
 
 	@Override
