@@ -42,6 +42,18 @@ import android.widget.Toast;
 
 public class WordActivity extends Activity {
 	private static final String FLASHCARD_ACTION = "org.openintents.action.CREATE_FLASHCARD";
+	private static final String CSS = "<style>" // formatter hack
+			+ "p.headword { display: none; }"
+			+ "object { display: none; }"
+			+ ".neopetit { font-size: 90%; }" //
+			+ ".neokap { font-size: 90%; }" //
+			+ "p { margin: 0; }"
+			+ "a.sound { "
+			+ "	text-decoration: none;"
+			+ "	width: 16px; height: 16px;" //
+			+ "	display: inline-block;"
+			+ "	background-image: url('file:///android_asset/audio.png');" //
+			+ "}" + "</style>";
 	private WebView mWebView;
 	private Ordboken mOrdboken;
 	private NeWord mWord;
@@ -129,13 +141,6 @@ public class WordActivity extends Activity {
 				return;
 			}
 
-			String header = "<style>" + "p.headword { display: none; }"
-					+ "object { display: none; }" + ".neopetit { font-size: 90%; }"
-					+ ".neokap { font-size: 90%; }" + "p { margin: 0; }" + "a.sound { "
-					+ "	text-decoration: none;" + "	width: 16px; height: 16px;"
-					+ "	display: inline-block;"
-					+ "	background-image: url('file:///android_asset/audio.png');" + "}"
-					+ "</style>";
 			String text = result.mText;
 
 			if (result.mHasAudio) {
@@ -143,7 +148,7 @@ public class WordActivity extends Activity {
 						.replace("</object>", "</object><a class='sound' href='/playAudio'></a>");
 			}
 
-			mWebView.loadDataWithBaseURL("http://api.ne.se/", header + text, "text/html", "UTF-8",
+			mWebView.loadDataWithBaseURL("http://api.ne.se/", CSS + text, "text/html", "UTF-8",
 					null);
 			setTitle(result.mTitle);
 			mStatusLayout.setVisibility(View.GONE);
@@ -201,7 +206,7 @@ public class WordActivity extends Activity {
 		if (mWord != null) {
 			Intent shareIntent = new Intent(FLASHCARD_ACTION);
 			shareIntent.putExtra("SOURCE_TEXT", mWord.mTitle);
-			shareIntent.putExtra("TARGET_TEXT", mWord.mText);
+			shareIntent.putExtra("TARGET_TEXT", CSS + mWord.mText);
 			mShareActionProvider.setShareIntent(shareIntent);
 		} else {
 			mShareActionProvider.setShareIntent(null);
