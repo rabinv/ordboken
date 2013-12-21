@@ -122,7 +122,7 @@ public class MainActivity extends ListActivity {
 			}
 
 			try {
-				return mOrdboken.getNeClient().fetchSearchResults(params[0]);
+				return mOrdboken.getNeClient().fetchSearchResults(params[0], 30);
 			} catch (Exception e) {
 				return null;
 			}

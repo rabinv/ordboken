@@ -68,7 +68,7 @@ public class NeSuggestionProvider extends ContentProvider {
 
 		try {
 			NeSearchResult[] results = Ordboken.getInstance(getContext()).getNeClient()
-					.fetchSearchResults(q);
+					.fetchSearchResults(q, 10);
 
 			for (int i = 0; i < results.length; i++) {
 				cursor.addRow(new Object[] { i, results[i].mTitle, results[i].mSummary,

@@ -253,12 +253,13 @@ public class NeClient {
 		}
 	}
 
-	public NeSearchResult[] fetchSearchResults(String query) throws ParserException, IOException {
+	public NeSearchResult[] fetchSearchResults(String query, int count) throws ParserException,
+			IOException {
 		Uri.Builder uriBuilder = Uri.parse("http://api.ne.se/search").buildUpon();
 
 		uriBuilder.appendQueryParameter("fq", "type:ordbok");
 		uriBuilder.appendQueryParameter("q", query);
-		uriBuilder.appendQueryParameter("rows", "30");
+		uriBuilder.appendQueryParameter("rows", Integer.toString(count));
 
 		try {
 			JSONObject json = publicApiRequest(uriBuilder.build().toString());
