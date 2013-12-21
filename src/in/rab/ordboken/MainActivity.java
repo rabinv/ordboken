@@ -175,7 +175,8 @@ public class MainActivity extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
-		return mOrdboken.initSearchView(this, menu, mLastQuery, true);
+		mOrdboken.initSearchView(this, menu, mLastQuery, true);
+		return true;
 	}
 
 	@Override

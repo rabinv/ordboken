@@ -44,7 +44,6 @@ public class Ordboken {
 	private final Context mContext;
 	private final ConnectivityManager mConnMgr;
 	public final SharedPreferences mPrefs;
-	public SearchView mSearchView;
 	private NeWord mLastWord;
 
 	private Ordboken(Context context) {
@@ -115,25 +114,27 @@ public class Ordboken {
 		return ed;
 	}
 
-	public boolean initSearchView(Activity activity, Menu menu, String query, Boolean expanded) {
+	public SearchView initSearchView(Activity activity, Menu menu, String query, Boolean expanded) {
 		SearchManager searchManager = (SearchManager) activity
 				.getSystemService(Context.SEARCH_SERVICE);
-		mSearchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+		SearchView searchView;
 
-		mSearchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(activity,
+		searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+
+		searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(activity,
 				MainActivity.class)));
 
-		mSearchView.setIconifiedByDefault(!expanded);
-		mSearchView.setFocusable(false);
+		searchView.setIconifiedByDefault(!expanded);
+		searchView.setFocusable(false);
 
-		mSearchView.setSubmitButtonEnabled(true);
-		mSearchView.setQueryRefinementEnabled(true);
+		searchView.setSubmitButtonEnabled(true);
+		searchView.setQueryRefinementEnabled(true);
 
 		if (query != null) {
-			mSearchView.setQuery(query, false);
+			searchView.setQuery(query, false);
 		}
 
-		return true;
+		return searchView;
 	}
 
 	public boolean onOptionsItemSelected(Activity activity, MenuItem item) {

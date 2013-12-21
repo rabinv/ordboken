@@ -253,7 +253,8 @@ public class WordActivity extends Activity {
 			mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
 		}
 
-		return mOrdboken.initSearchView(this, menu, null, false);
+		mOrdboken.initSearchView(this, menu, null, false);
+		return true;
 	}
 
 	@Override
