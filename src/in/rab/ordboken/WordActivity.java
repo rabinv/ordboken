@@ -18,8 +18,10 @@ package in.rab.ordboken;
 
 import in.rab.ordboken.NeClient.NeWord;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -36,6 +38,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +56,11 @@ public class WordActivity extends Activity {
 			+ "	width: 16px; height: 16px;" //
 			+ "	display: inline-block;"
 			+ "	background-image: url('file:///android_asset/audio.png');" //
+			+ "}" //
+			+ "a.normal {" //
+			+ " text-decoration: inherit;" //
+			+ " color: inherit;" //
+			+ " cursor: default;" //
 			+ "}" + "</style>";
 	private WebView mWebView;
 	private Ordboken mOrdboken;
@@ -62,6 +70,7 @@ public class WordActivity extends Activity {
 	private TextView mStatusText;
 	private LinearLayout mStatusLayout;
 	private ShareActionProvider mShareActionProvider;
+	private SearchView mSearchView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +85,7 @@ public class WordActivity extends Activity {
 
 		settings.setBuiltInZoomControls(true);
 		settings.setDisplayZoomControls(false);
+		settings.setJavaScriptEnabled(true);
 
 		mWebView.setInitialScale(mOrdboken.mPrefs.getInt("scale", 100));
 		mWebView.setWebViewClient(new WebViewClient() {
@@ -83,6 +93,18 @@ public class WordActivity extends Activity {
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
 				if (url.indexOf("/playAudio") != -1) {
 					new AudioTask().execute();
+				} else if (url.indexOf("/search/") != -1) {
+					String word = url.substring(url.indexOf("ch/") + 3);
+
+					try {
+						mSearchView.setQuery(URLDecoder.decode(word, "UTF-8"), false);
+						mSearchView.setIconified(false);
+						mSearchView.requestFocusFromTouch();
+					} catch (UnsupportedEncodingException e) {
+						// Should not happen.
+					}
+
+					return true;
 				} else {
 					Intent intent = new Intent(WordActivity.this, WordActivity.class);
 					intent.putExtra("url", url);
@@ -142,14 +164,15 @@ public class WordActivity extends Activity {
 			}
 
 			String text = result.mText;
+			String javascript = "<script src='file:///android_asset/word.js'></script>";
 
 			if (result.mHasAudio) {
 				text = text
 						.replace("</object>", "</object><a class='sound' href='/playAudio'></a>");
 			}
 
-			mWebView.loadDataWithBaseURL("http://api.ne.se/", CSS + text, "text/html", "UTF-8",
-					null);
+			mWebView.loadDataWithBaseURL("http://api.ne.se/", CSS + text + javascript, "text/html",
+					"UTF-8", null);
 			setTitle(result.mTitle);
 			mStatusLayout.setVisibility(View.GONE);
 			mWebView.setVisibility(View.VISIBLE);
@@ -253,7 +276,7 @@ public class WordActivity extends Activity {
 			mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
 		}
 
-		mOrdboken.initSearchView(this, menu, null, false);
+		mSearchView = mOrdboken.initSearchView(this, menu, null, false);
 		return true;
 	}
 
