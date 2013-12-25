@@ -36,6 +36,7 @@ import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
@@ -66,9 +67,11 @@ public class WordActivity extends Activity {
 	private Ordboken mOrdboken;
 	private NeWord mWord;
 	private String mTitle;
+	private String mUrl;
 	private ProgressBar mProgressBar;
 	private TextView mStatusText;
 	private LinearLayout mStatusLayout;
+	private Button mRetryButton;
 	private ShareActionProvider mShareActionProvider;
 	private SearchView mSearchView;
 
@@ -118,6 +121,7 @@ public class WordActivity extends Activity {
 		mProgressBar = (ProgressBar) findViewById(R.id.word_progress);
 		mStatusText = (TextView) findViewById(R.id.word_status);
 		mStatusLayout = (LinearLayout) findViewById(R.id.word_status_layout);
+		mRetryButton = (Button) findViewById(R.id.word_retry);
 
 		Intent intent = getIntent();
 
@@ -127,11 +131,19 @@ public class WordActivity extends Activity {
 		}
 
 		try {
-			String url = new URI(intent.getStringExtra("url")).toASCIIString();
-			new WordTask().execute(url);
+			mUrl = new URI(intent.getStringExtra("url")).toASCIIString();
 		} catch (URISyntaxException e) {
 			finish();
 		}
+
+		fetchWord(null);
+	}
+
+	public void fetchWord(View view) {
+		mProgressBar.setVisibility(View.VISIBLE);
+		mStatusText.setText(R.string.loading);
+		mRetryButton.setVisibility(View.GONE);
+		new WordTask().execute(mUrl);
 	}
 
 	private class WordTask extends AsyncTask<String, Void, NeWord> {
@@ -160,6 +172,8 @@ public class WordActivity extends Activity {
 				} else {
 					mStatusText.setText(R.string.error_word);
 				}
+
+				mRetryButton.setVisibility(View.VISIBLE);
 				return;
 			}
 

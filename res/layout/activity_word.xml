@@ -36,6 +36,15 @@
            android:fontFamily="sans-serif-light"
            android:text="@string/loading"
            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+       <Button
+           android:id="@+id/word_retry"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:text="@string/tryagain"
+           android:onClick="fetchWord"
+           android:visibility="gone" />
+
     </LinearLayout>
 
 </RelativeLayout>

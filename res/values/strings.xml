@@ -16,6 +16,7 @@
     <string name="signing_in">Loggar in&#8230;</string>
 
     <string name="loading">Laddar&#8230;</string>
+    <string name="tryagain">Försök igen</string>
 
     <string name="error_login_failed">Inloggning misslyckades.</string>
     <string name="error_offline">Ingen anslutning.</string>
