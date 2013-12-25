@@ -21,7 +21,6 @@ import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -48,7 +47,6 @@ public class MainActivity extends ListActivity {
 		setContentView(R.layout.activity_main);
 
 		mOrdboken = Ordboken.getInstance(this);
-		mLastQuery = mOrdboken.mPrefs.getString("lastQuery", "ordbok");
 
 		if (mOrdboken.mPrefs.getBoolean("loggedIn", false) == false) {
 			startActivity(new Intent(this, LoginActivity.class));
@@ -64,7 +62,19 @@ public class MainActivity extends ListActivity {
 				|| Intent.ACTION_VIEW.equals(intent.getAction())) {
 			onNewIntent(intent);
 		} else {
-			doSearch(mLastQuery);
+			restoreLastView();
+		}
+	}
+
+	private void restoreLastView() {
+		Ordboken.Where where = mOrdboken.getLastWhere();
+		String what = mOrdboken.getLastWhat();
+
+		if (where == Ordboken.Where.MAIN) {
+			doSearch(what);
+		} else if (where == Ordboken.Where.WORD) {
+			openWord(null, what);
+			finish();
 		}
 	}
 
@@ -72,9 +82,8 @@ public class MainActivity extends ListActivity {
 	protected void onPause() {
 		super.onPause();
 
-		SharedPreferences.Editor ed = mOrdboken.getPrefsEditor();
-		ed.putString("lastQuery", mLastQuery);
-		ed.commit();
+		mOrdboken.setLastView(Ordboken.Where.MAIN, mLastQuery);
+		mOrdboken.getPrefsEditor().commit();
 	}
 
 	private void openWord(String word, String url) {

@@ -45,6 +45,12 @@ public class Ordboken {
 	private final ConnectivityManager mConnMgr;
 	public final SharedPreferences mPrefs;
 	private NeWord mLastWord;
+	private Where mLastWhere;
+	private String mLastWhat;
+
+	public enum Where {
+		MAIN, WORD
+	}
 
 	private Ordboken(Context context) {
 		mContext = context;
@@ -58,6 +64,8 @@ public class Ordboken {
 		}
 
 		mPrefs = context.getSharedPreferences("ordboken", Context.MODE_PRIVATE);
+		mLastWhere = Where.valueOf(mPrefs.getString("lastWhere", Where.MAIN.toString()));
+		mLastWhat = mPrefs.getString("lastWhat", "ordbok");
 
 		mConnMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -106,6 +114,8 @@ public class Ordboken {
 	public SharedPreferences.Editor getPrefsEditor() {
 		SharedPreferences.Editor ed = mPrefs.edit();
 
+		ed.putString("lastWhere", mLastWhere.toString());
+		ed.putString("lastWhat", mLastWhat);
 		ed.putString("refreshToken", mNeClient.getRefreshToken());
 		if (mCookieSerializer != null) {
 			ed.putString("cookies", mCookieSerializer.saveToString());
@@ -168,5 +178,18 @@ public class Ordboken {
 
 	public void setLastWord(NeWord word) {
 		mLastWord = word;
+	}
+
+	public void setLastView(Where where, String what) {
+		mLastWhere = where;
+		mLastWhat = what;
+	}
+
+	public Where getLastWhere() {
+		return mLastWhere;
+	}
+
+	public String getLastWhat() {
+		return mLastWhat;
 	}
 }

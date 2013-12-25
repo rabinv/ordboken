@@ -241,7 +241,6 @@ public class WordActivity extends Activity {
 		super.onResume();
 		mOrdboken.setLastWord(mWord);
 		updateShareIntent();
-
 	}
 
 	@Override
@@ -250,6 +249,10 @@ public class WordActivity extends Activity {
 		overridePendingTransition(0, 0);
 
 		mOrdboken.setLastWord(null);
+		if (mWord != null) {
+			mOrdboken.setLastView(Ordboken.Where.WORD, mWord.mUrl);
+		}
+
 		SharedPreferences.Editor ed = mOrdboken.getPrefsEditor();
 
 		// If the WebView was not made visible, getScale() does not
