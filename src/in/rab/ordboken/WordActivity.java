@@ -151,7 +151,7 @@ public class WordActivity extends Activity {
 		@Override
 		protected void onPostExecute(NeWord result) {
 			mWord = result;
-			mOrdboken.setLastWord(mWord);
+			mOrdboken.setCurrentWord(mWord);
 
 			if (result == null) {
 				mProgressBar.setVisibility(View.GONE);
@@ -239,7 +239,7 @@ public class WordActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		mOrdboken.setLastWord(mWord);
+		mOrdboken.setCurrentWord(mWord);
 		updateShareIntent();
 	}
 
@@ -248,7 +248,7 @@ public class WordActivity extends Activity {
 		super.onPause();
 		overridePendingTransition(0, 0);
 
-		mOrdboken.setLastWord(null);
+		mOrdboken.setCurrentWord(null);
 		if (mWord != null) {
 			mOrdboken.setLastView(Ordboken.Where.WORD, mWord.mUrl);
 		}

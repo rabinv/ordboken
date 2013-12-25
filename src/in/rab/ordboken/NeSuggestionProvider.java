@@ -58,7 +58,7 @@ public class NeSuggestionProvider extends ContentProvider {
 		String q = uri.getLastPathSegment();
 
 		if (q.equals(SearchManager.SUGGEST_URI_PATH_QUERY)) {
-			NeWord lastWord = Ordboken.getInstance(getContext()).getLastWord();
+			NeWord lastWord = Ordboken.getInstance(getContext()).getCurrentWord();
 
 			if (lastWord != null) {
 				cursor.addRow(new Object[] { 0, lastWord.mTitle, "", lastWord.mUrl, lastWord.mTitle });

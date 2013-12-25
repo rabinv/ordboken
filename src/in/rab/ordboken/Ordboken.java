@@ -44,7 +44,7 @@ public class Ordboken {
 	private final Context mContext;
 	private final ConnectivityManager mConnMgr;
 	public final SharedPreferences mPrefs;
-	private NeWord mLastWord;
+	private NeWord mCurrentWord;
 	private Where mLastWhere;
 	private String mLastWhat;
 
@@ -172,12 +172,12 @@ public class Ordboken {
 		return false;
 	}
 
-	public NeWord getLastWord() {
-		return mLastWord;
+	public NeWord getCurrentWord() {
+		return mCurrentWord;
 	}
 
-	public void setLastWord(NeWord word) {
-		mLastWord = word;
+	public void setCurrentWord(NeWord word) {
+		mCurrentWord = word;
 	}
 
 	public void setLastView(Where where, String what) {
