@@ -28,12 +28,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class MainActivity extends ListActivity {
-
+	private Button mRetryButton;
 	private ProgressBar mProgressBar;
 	private TextView mStatusText;
 	private String mLastQuery;
@@ -56,6 +57,7 @@ public class MainActivity extends ListActivity {
 
 		mProgressBar = (ProgressBar) findViewById(R.id.main_progress);
 		mStatusText = (TextView) findViewById(R.id.main_status);
+		mRetryButton = (Button) findViewById(R.id.main_retry);
 
 		Intent intent = getIntent();
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())
@@ -147,6 +149,7 @@ public class MainActivity extends ListActivity {
 				} else {
 					mStatusText.setText(R.string.error_results);
 				}
+				mRetryButton.setVisibility(View.VISIBLE);
 				return;
 			}
 
@@ -159,8 +162,13 @@ public class MainActivity extends ListActivity {
 	private void doSearch(String query) {
 		mProgressBar.setVisibility(View.VISIBLE);
 		mStatusText.setText(R.string.loading);
+		mRetryButton.setVisibility(View.GONE);
 		mLastQuery = query;
 		new SearchTask().execute(query);
+	}
+
+	public void doSearchAgain(View view) {
+		doSearch(mLastQuery);
 	}
 
 	@Override
