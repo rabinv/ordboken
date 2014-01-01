@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -80,6 +81,7 @@ public class WordActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		mOrdboken = Ordboken.getInstance(this);
 
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.activity_word);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -95,6 +97,7 @@ public class WordActivity extends Activity {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
 				if (url.indexOf("/playAudio") != -1) {
+					setProgressBarIndeterminateVisibility(true);
 					new AudioTask().execute();
 				} else if (url.indexOf("/search/") != -1) {
 					String word = url.substring(url.indexOf("ch/") + 3);
@@ -205,11 +208,16 @@ public class WordActivity extends Activity {
 			}
 		}
 
+		private void showError() {
+			setProgressBarIndeterminateVisibility(false);
+			Toast.makeText(getApplicationContext(), R.string.error_audio, Toast.LENGTH_SHORT)
+					.show();
+		}
+
 		@Override
 		protected void onPostExecute(String audioUrl) {
 			if (audioUrl == null) {
-				Toast.makeText(getApplicationContext(), R.string.error_audio, Toast.LENGTH_SHORT)
-						.show();
+				showError();
 				return;
 			}
 
@@ -219,15 +227,23 @@ public class WordActivity extends Activity {
 			try {
 				mediaPlayer.setDataSource(audioUrl);
 			} catch (Exception e) {
-				Toast.makeText(getApplicationContext(), R.string.error_audio, Toast.LENGTH_SHORT)
-						.show();
+				showError();
 				return;
 			}
 
 			mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 				@Override
 				public void onPrepared(MediaPlayer mp) {
+					setProgressBarIndeterminateVisibility(false);
 					mp.start();
+				}
+			});
+
+			mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+				@Override
+				public boolean onError(MediaPlayer mp, int what, int extra) {
+					showError();
+					return false;
 				}
 			});
 
