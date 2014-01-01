@@ -141,7 +141,7 @@ public class NeClient {
 			return word.getAudioUrl();
 		}
 
-		Uri.Builder uriBuilder = Uri.parse("http://www.ne.se/sve/").buildUpon();
+		Uri.Builder uriBuilder = Uri.parse("https://www.ne.se/sve/").buildUpon();
 		uriBuilder.appendPath(word.mSlug);
 
 		String page = fetchMainSitePage(uriBuilder.build().toString());
@@ -206,7 +206,7 @@ public class NeClient {
 	private String fetchMainSitePage(String pageUrl) throws IOException, LoginException,
 			ParserException {
 		URL url = new URL(pageUrl);
-		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+		HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
 		urlConnection.setInstanceFollowRedirects(false);
 		urlConnection.connect();
 
@@ -230,7 +230,7 @@ public class NeClient {
 			}
 
 			url = new URL(pageUrl);
-			urlConnection = (HttpURLConnection) url.openConnection();
+			urlConnection = (HttpsURLConnection) url.openConnection();
 			urlConnection.setInstanceFollowRedirects(false);
 			urlConnection.connect();
 
