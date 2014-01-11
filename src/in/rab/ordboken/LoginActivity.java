@@ -103,11 +103,11 @@ public class LoginActivity extends Activity {
 		@Override
 		protected void onPostExecute(final Boolean success) {
 			mAuthTask = null;
-			showProgress(false);
 
 			if (!success) {
 				Toast.makeText(getApplicationContext(), R.string.error_login_failed,
 						Toast.LENGTH_SHORT).show();
+				showProgress(false);
 				mPasswordView.requestFocus();
 				return;
 			}
