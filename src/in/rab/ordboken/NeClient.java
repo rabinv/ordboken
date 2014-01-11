@@ -36,6 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.net.Uri;
+import android.util.Base64;
 
 public class NeClient {
 	private String mUsername;
@@ -43,11 +44,14 @@ public class NeClient {
 	private final Authenticator authenticator;
 
 	public enum Auth {
-		OAUTH2,
+		OAUTH2, BASIC
 	};
 
 	public NeClient(Auth auth) {
-		authenticator = new Oauth2Authenticator();
+		if (auth == Auth.OAUTH2)
+			authenticator = new Oauth2Authenticator();
+		else
+			authenticator = new BasicAuthenticator();
 	}
 
 	public void setUsername(String username) {
@@ -333,6 +337,62 @@ public class NeClient {
 
 		abstract JSONObject fetch(String requestUrl) throws IOException, LoginException,
 				JSONException;
+	}
+
+	private class BasicAuthenticator extends Authenticator {
+		private String mAuthorization;
+
+		private String makeAuthorization(String userName, String password) {
+			String cred = userName + ':' + password;
+			String hash = Base64.encodeToString(cred.getBytes(), Base64.DEFAULT);
+			return "Basic " + hash;
+		}
+
+		@Override
+		boolean login(String userName, String password) throws IOException {
+			mAuthorization = makeAuthorization(userName, password);
+
+			try {
+				fetch("http://api.ne.se/ordbok/svensk/ordbok");
+				return true;
+			} catch (LoginException e) {
+				return false;
+			} catch (JSONException e) {
+				return false;
+			}
+		}
+
+		@Override
+		void logout() {
+			mAuthorization = null;
+		}
+
+		@Override
+		JSONObject fetch(String requestUrl) throws IOException, LoginException, JSONException {
+			if (mAuthorization == null) {
+				if (mUsername != null && mPassword != null) {
+					mAuthorization = makeAuthorization(mUsername, mPassword);
+				} else {
+					throw new LoginException("Login required");
+				}
+			}
+
+			URL url = new URL(requestUrl);
+			HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+			urlConnection.addRequestProperty("Authorization", mAuthorization);
+			urlConnection.addRequestProperty("Accept", "application/json");
+			urlConnection.connect();
+
+			try {
+				if (urlConnection.getResponseCode() == 401) {
+					throw new LoginException("Login failed");
+				}
+
+				return new JSONObject(inputStreamToString(urlConnection.getInputStream()));
+			} finally {
+				urlConnection.disconnect();
+			}
+		}
 	}
 
 	private class Oauth2Authenticator extends Authenticator {
