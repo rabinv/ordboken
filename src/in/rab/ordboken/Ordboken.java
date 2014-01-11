@@ -69,7 +69,7 @@ public class Ordboken {
 
 		mConnMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-		mNeClient = new NeClient(NeClient.Auth.OAUTH2);
+		mNeClient = new NeClient(NeClient.Auth.BASIC);
 		mNeClient.setPersistentAuthData(mPrefs.getString("persistentAuthData", null));
 		mNeClient.setUsername(mPrefs.getString("username", null));
 		mNeClient.setPassword(mPrefs.getString("password", null));
