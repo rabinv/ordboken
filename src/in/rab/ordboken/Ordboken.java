@@ -69,8 +69,8 @@ public class Ordboken {
 
 		mConnMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-		mNeClient = new NeClient();
-		mNeClient.setRefreshToken(mPrefs.getString("refreshToken", null));
+		mNeClient = new NeClient(NeClient.Auth.OAUTH2);
+		mNeClient.setPersistentAuthData(mPrefs.getString("persistentAuthData", null));
 		mNeClient.setUsername(mPrefs.getString("username", null));
 		mNeClient.setPassword(mPrefs.getString("password", null));
 	}
@@ -116,7 +116,7 @@ public class Ordboken {
 
 		ed.putString("lastWhere", mLastWhere.toString());
 		ed.putString("lastWhat", mLastWhat);
-		ed.putString("refreshToken", mNeClient.getRefreshToken());
+		ed.putString("persistentAuthData", mNeClient.getPersistentAuthData());
 		if (mCookieSerializer != null) {
 			ed.putString("cookies", mCookieSerializer.saveToString());
 		}
@@ -150,8 +150,7 @@ public class Ordboken {
 	public boolean onOptionsItemSelected(Activity activity, MenuItem item) {
 		if (item.getItemId() == R.id.menu_logout) {
 			updateCreds("", "");
-			mNeClient.setRefreshToken(null);
-			mNeClient.setAccessToken(null);
+			mNeClient.logout();
 
 			SharedPreferences.Editor ed = mPrefs.edit();
 			ed.putBoolean("loggedIn", false);

@@ -38,11 +38,17 @@ import org.json.JSONObject;
 import android.net.Uri;
 
 public class NeClient {
-	private String mRefreshToken;
-	private String mAccessToken;
 	private String mUsername;
 	private String mPassword;
-	private long mAccessExpiry;
+	private final Authenticator authenticator;
+
+	public enum Auth {
+		OAUTH2,
+	};
+
+	public NeClient(Auth auth) {
+		authenticator = new Oauth2Authenticator();
+	}
 
 	public void setUsername(String username) {
 		mUsername = username;
@@ -50,18 +56,6 @@ public class NeClient {
 
 	public void setPassword(String password) {
 		mPassword = password;
-	}
-
-	public String getRefreshToken() {
-		return mRefreshToken;
-	}
-
-	public void setRefreshToken(String token) {
-		mRefreshToken = token;
-	}
-
-	public void setAccessToken(String token) {
-		mAccessToken = token;
 	}
 
 	public class LoginException extends Exception {
@@ -306,127 +300,188 @@ public class NeClient {
 
 	private JSONObject privateApiRequest(String requestUrl) throws IOException, LoginException,
 			JSONException {
-		if (System.currentTimeMillis() + 10000 > mAccessExpiry && !authenticate()) {
-			throw new LoginException("Login required");
-		}
-
-		URL url = new URL(requestUrl);
-		HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-		urlConnection.addRequestProperty("Authorization", "Bearer " + mAccessToken);
-		urlConnection.addRequestProperty("Accept", "application/json");
-		urlConnection.connect();
-
-		int resp;
-
-		try {
-			resp = urlConnection.getResponseCode();
-		} catch (IOException e) {
-			urlConnection.disconnect();
-			throw e;
-		}
-
-		if (resp == 401) {
-			urlConnection.disconnect();
-
-			if (!authenticate()) {
-				throw new LoginException("Login required");
-			}
-
-			urlConnection = (HttpURLConnection) url.openConnection();
-			urlConnection.addRequestProperty("Authorization", "Bearer " + mAccessToken);
-			urlConnection.addRequestProperty("Accept", "application/json");
-			urlConnection.connect();
-		}
-
-		try {
-			if (urlConnection.getResponseCode() == 401) {
-				throw new LoginException("Login required");
-			}
-
-			return new JSONObject(inputStreamToString(urlConnection.getInputStream()));
-		} finally {
-			urlConnection.disconnect();
-		}
-	}
-
-	private boolean requestToken(ArrayList<BasicNameValuePair> data) throws IOException {
-		String page;
-
-		URL url = new URL("https://www.ne.se/oauth/token");
-		UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data);
-
-		HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-		urlConnection.addRequestProperty("Authorization", "Basic bWVkaWEtc2VydmljZTo=");
-		urlConnection.addRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		urlConnection.setFixedLengthStreamingMode((int) entity.getContentLength());
-		urlConnection.setDoOutput(true);
-
-		try {
-			OutputStream output = urlConnection.getOutputStream();
-			entity.writeTo(output);
-			output.close();
-
-			int response = urlConnection.getResponseCode();
-			if (response != 200) {
-				return false;
-			}
-
-			page = inputStreamToString(urlConnection.getInputStream());
-		} finally {
-			urlConnection.disconnect();
-		}
-
-		try {
-			JSONObject json = new JSONObject(page);
-			mAccessToken = json.getString("access_token");
-			mRefreshToken = json.getString("refresh_token");
-			mAccessExpiry = System.currentTimeMillis() + json.getInt("expires_in") * 1000;
-			return true;
-		} catch (JSONException e) {
-			return false;
-		}
-	}
-
-	private boolean authenticate() throws IOException {
-		if (refreshToken()) {
-			return true;
-		}
-
-		return login(mUsername, mPassword);
-	}
-
-	private boolean refreshToken() throws IOException {
-		if (mRefreshToken == null) {
-			return false;
-		}
-
-		ArrayList<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
-
-		data.add(new BasicNameValuePair("grant_type", "refresh_token"));
-		data.add(new BasicNameValuePair("refresh_token", mRefreshToken));
-
-		try {
-			return requestToken(data);
-		} catch (EOFException e) {
-			// For some reason, EOFException is raised on some token refreshes.
-			// Needs to be investigated further.
-			return requestToken(data);
-		}
+		return authenticator.fetch(requestUrl);
 	}
 
 	public boolean login(String userName, String password) throws IOException {
-		ArrayList<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
+		return authenticator.login(userName, password);
+	}
 
-		data.add(new BasicNameValuePair("grant_type", "password"));
-		data.add(new BasicNameValuePair("scope", "read"));
-		data.add(new BasicNameValuePair("username", userName));
-		data.add(new BasicNameValuePair("password", password));
+	public void logout() {
+		authenticator.logout();
+	}
 
-		try {
-			return requestToken(data);
-		} catch (EOFException e) {
-			// Never seen it here but doesn't hurt.
-			return requestToken(data);
+	public String getPersistentAuthData() {
+		return authenticator.getPersistentAuthData();
+	}
+
+	public void setPersistentAuthData(String data) {
+		authenticator.setPersistentAuthData(data);
+	}
+
+	private abstract class Authenticator {
+		public String getPersistentAuthData() {
+			return null;
+		}
+
+		public void setPersistentAuthData(String data) {
+		}
+
+		abstract boolean login(String userName, String password) throws IOException;
+
+		abstract void logout();
+
+		abstract JSONObject fetch(String requestUrl) throws IOException, LoginException,
+				JSONException;
+	}
+
+	private class Oauth2Authenticator extends Authenticator {
+		private long mAccessExpiry;
+		private String mAccessToken;
+		private String mRefreshToken;
+
+		@Override
+		public String getPersistentAuthData() {
+			return mRefreshToken;
+		}
+
+		@Override
+		public void setPersistentAuthData(String data) {
+			mRefreshToken = data;
+		}
+
+		@Override
+		public JSONObject fetch(String requestUrl) throws IOException, LoginException,
+				JSONException {
+			if (System.currentTimeMillis() + 10000 > mAccessExpiry && !authenticate()) {
+				throw new LoginException("Login required");
+			}
+
+			URL url = new URL(requestUrl);
+			HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+			urlConnection.addRequestProperty("Authorization", "Bearer " + mAccessToken);
+			urlConnection.addRequestProperty("Accept", "application/json");
+			urlConnection.connect();
+
+			int resp;
+
+			try {
+				resp = urlConnection.getResponseCode();
+			} catch (IOException e) {
+				urlConnection.disconnect();
+				throw e;
+			}
+
+			if (resp == 401) {
+				urlConnection.disconnect();
+
+				if (!authenticate()) {
+					throw new LoginException("Login required");
+				}
+
+				urlConnection = (HttpURLConnection) url.openConnection();
+				urlConnection.addRequestProperty("Authorization", "Bearer " + mAccessToken);
+				urlConnection.addRequestProperty("Accept", "application/json");
+				urlConnection.connect();
+			}
+
+			try {
+				if (urlConnection.getResponseCode() == 401) {
+					throw new LoginException("Login required");
+				}
+
+				return new JSONObject(inputStreamToString(urlConnection.getInputStream()));
+			} finally {
+				urlConnection.disconnect();
+			}
+		}
+
+		private boolean requestToken(ArrayList<BasicNameValuePair> data) throws IOException {
+			String page;
+
+			URL url = new URL("https://www.ne.se/oauth/token");
+			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data);
+
+			HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+			urlConnection.addRequestProperty("Authorization", "Basic bWVkaWEtc2VydmljZTo=");
+			urlConnection.addRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			urlConnection.setFixedLengthStreamingMode((int) entity.getContentLength());
+			urlConnection.setDoOutput(true);
+
+			try {
+				OutputStream output = urlConnection.getOutputStream();
+				entity.writeTo(output);
+				output.close();
+
+				int response = urlConnection.getResponseCode();
+				if (response != 200) {
+					return false;
+				}
+
+				page = inputStreamToString(urlConnection.getInputStream());
+			} finally {
+				urlConnection.disconnect();
+			}
+
+			try {
+				JSONObject json = new JSONObject(page);
+				mAccessToken = json.getString("access_token");
+				mRefreshToken = json.getString("refresh_token");
+				mAccessExpiry = System.currentTimeMillis() + json.getInt("expires_in") * 1000;
+				return true;
+			} catch (JSONException e) {
+				return false;
+			}
+		}
+
+		private boolean authenticate() throws IOException {
+			if (refreshToken()) {
+				return true;
+			}
+
+			return login(mUsername, mPassword);
+		}
+
+		private boolean refreshToken() throws IOException {
+			if (mRefreshToken == null) {
+				return false;
+			}
+
+			ArrayList<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
+
+			data.add(new BasicNameValuePair("grant_type", "refresh_token"));
+			data.add(new BasicNameValuePair("refresh_token", mRefreshToken));
+
+			try {
+				return requestToken(data);
+			} catch (EOFException e) {
+				// For some reason, EOFException is raised on some token refreshes.
+				// Needs to be investigated further.
+				return requestToken(data);
+			}
+		}
+
+		@Override
+		public boolean login(String userName, String password) throws IOException {
+			ArrayList<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
+
+			data.add(new BasicNameValuePair("grant_type", "password"));
+			data.add(new BasicNameValuePair("scope", "read"));
+			data.add(new BasicNameValuePair("username", userName));
+			data.add(new BasicNameValuePair("password", password));
+
+			try {
+				return requestToken(data);
+			} catch (EOFException e) {
+				// Never seen it here but doesn't hurt.
+				return requestToken(data);
+			}
+		}
+
+		@Override
+		public void logout() {
+			mRefreshToken = null;
+			mAccessToken = null;
 		}
 	}
 }
