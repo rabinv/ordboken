@@ -9,15 +9,15 @@ var getPos = function(regex, html) {
 };
 
 var createLinks = function(el) {
-	var regex = /([A-Za-z\u0080-\u00FF-]+)( ?)(?![^<]*>)/g;
+	var regex = /([ >"'])([A-Za-z\u0080-\u00FF-]+)(?![^<]*>)/g;
 	var html = el.innerHTML;
 	var astarts = getPos(/<a/gi, html);
 	var aends = getPos(/\/a>/gi, html);
 	var apos = 0;
 
-	el.innerHTML = html.replace(regex, function(m, a, rest, offset) {
+	el.innerHTML = html.replace(regex, function(m, before, a, offset) {
 		if (a.length <= 2) {
-			return a + rest;
+			return before + a;
 		}
 
 		while (apos < aends.length && offset > aends[apos]) {
@@ -25,10 +25,10 @@ var createLinks = function(el) {
 		}
 
 		if (apos < aends.length && offset > astarts[apos] && offset < aends[apos]) {
-			return a + rest;
+			return before + a;
 		}
 
-		return '<a class="normal" href="/search/' + a + '">' + a + "</a>" + rest;
+		return before + '<a class="normal" href="/search/' + a + '">' + a + "</a>";
 	});
 };
 
