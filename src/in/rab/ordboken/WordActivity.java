@@ -149,6 +149,18 @@ public class WordActivity extends Activity {
 		new WordTask().execute(mUrl);
 	}
 
+	private void loadWebView(NeWord word) {
+		String text = word.mText;
+		String javascript = "<script src='file:///android_asset/word.js'></script>";
+
+		if (word.mHasAudio) {
+			text = text.replace("</object>", "</object><a class='sound' href='/playAudio'></a>");
+		}
+
+		mWebView.loadDataWithBaseURL("http://api.ne.se/", CSS + text + javascript, "text/html",
+				"UTF-8", null);
+	}
+
 	private class WordTask extends AsyncTask<String, Void, NeWord> {
 		@Override
 		protected NeWord doInBackground(String... params) {
@@ -180,16 +192,7 @@ public class WordActivity extends Activity {
 				return;
 			}
 
-			String text = result.mText;
-			String javascript = "<script src='file:///android_asset/word.js'></script>";
-
-			if (result.mHasAudio) {
-				text = text
-						.replace("</object>", "</object><a class='sound' href='/playAudio'></a>");
-			}
-
-			mWebView.loadDataWithBaseURL("http://api.ne.se/", CSS + text + javascript, "text/html",
-					"UTF-8", null);
+			loadWebView(result);
 			setTitle(result.mTitle);
 			mStatusLayout.setVisibility(View.GONE);
 			mWebView.setVisibility(View.VISIBLE);
@@ -303,6 +306,8 @@ public class WordActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
 
+		menu.findItem(R.id.menu_resetzoom).setVisible(true);
+
 		if (getPackageManager().queryIntentActivities(new Intent(FLASHCARD_ACTION), 0).size() > 0) {
 			MenuItem shareItem = menu.findItem(R.id.menu_share);
 			shareItem.setVisible(true);
@@ -318,6 +323,14 @@ public class WordActivity extends Activity {
 		if (mOrdboken.onOptionsItemSelected(this, item)) {
 			return true;
 		}
+
+		if (item.getItemId() == R.id.menu_resetzoom) {
+			mWebView.setInitialScale(100);
+			if (mWord != null) {
+				loadWebView(mWord);
+			}
+		}
+
 		return super.onOptionsItemSelected(item);
 	}
 }

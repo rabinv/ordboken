@@ -14,6 +14,13 @@
           android:actionProviderClass="android.widget.ShareActionProvider" />
 
     <item
+        android:id="@+id/menu_resetzoom"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:visible="false"
+        android:title="@string/menu_resetzoom"/>
+
+    <item
         android:id="@+id/menu_logout"
         android:orderInCategory="100"
         android:showAsAction="never"
