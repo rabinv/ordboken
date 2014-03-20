@@ -9,7 +9,7 @@ var getPos = function(regex, html) {
 };
 
 var createLinks = function(el) {
-	var regex = /([ >"'])([A-Za-z\u0080-\u00FF-]+)(?![^<]*>)/g;
+	var regex = /([ >/"'(])([A-Za-z\u0080-\u00FF-]+)(?![^<]*>)/g;
 	var html = el.innerHTML;
 	var astarts = getPos(/<a/gi, html);
 	var aends = getPos(/\/a>/gi, html);
