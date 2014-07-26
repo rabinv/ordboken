@@ -67,7 +67,6 @@ public class WordActivity extends Activity {
     private WebView mWebView;
     private Ordboken mOrdboken;
     private NeWord mWord;
-    private String mTitle;
     private String mUrl;
     private ProgressBar mProgressBar;
     private TextView mStatusText;
@@ -128,9 +127,9 @@ public class WordActivity extends Activity {
 
         Intent intent = getIntent();
 
-        mTitle = intent.getStringExtra("title");
-        if (mTitle != null) {
-            setTitle(mTitle);
+        String title = intent.getStringExtra("title");
+        if (title != null) {
+            setTitle(title);
         }
 
         try {
