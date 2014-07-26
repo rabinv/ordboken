@@ -16,13 +16,6 @@
 
 package in.rab.ordboken;
 
-import in.rab.ordboken.NeClient.NeWord;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.SearchManager;
@@ -37,158 +30,165 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SearchView;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+
+import in.rab.ordboken.NeClient.NeWord;
+
 public class Ordboken {
-	private static Ordboken sInstance = null;
-	private CookieSerializer mCookieSerializer;
-	private final NeClient mNeClient;
-	private final Context mContext;
-	private final ConnectivityManager mConnMgr;
-	public final SharedPreferences mPrefs;
-	private NeWord mCurrentWord;
-	private Where mLastWhere;
-	private String mLastWhat;
+    private static Ordboken sInstance = null;
+    private CookieSerializer mCookieSerializer;
+    private final NeClient mNeClient;
+    private final Context mContext;
+    private final ConnectivityManager mConnMgr;
+    public final SharedPreferences mPrefs;
+    private NeWord mCurrentWord;
+    private Where mLastWhere;
+    private String mLastWhat;
 
-	public enum Where {
-		MAIN, WORD
-	}
+    public enum Where {
+        MAIN, WORD
+    }
 
-	private Ordboken(Context context) {
-		mContext = context;
+    private Ordboken(Context context) {
+        mContext = context;
 
-		try {
-			// Ends up only fully caching the search results. Documents use ETag
-			// and are conditionally cached.
-			HttpResponseCache.install(new File(context.getCacheDir(), "ordboken"), 1024 * 1024);
-		} catch (IOException e) {
-			// Oh well...
-		}
+        try {
+            // Ends up only fully caching the search results. Documents use ETag
+            // and are conditionally cached.
+            HttpResponseCache.install(new File(context.getCacheDir(), "ordboken"), 1024 * 1024);
+        } catch (IOException e) {
+            // Oh well...
+        }
 
-		mPrefs = context.getSharedPreferences("ordboken", Context.MODE_PRIVATE);
-		mLastWhere = Where.valueOf(mPrefs.getString("lastWhere", Where.MAIN.toString()));
-		mLastWhat = mPrefs.getString("lastWhat", "ordbok");
+        mPrefs = context.getSharedPreferences("ordboken", Context.MODE_PRIVATE);
+        mLastWhere = Where.valueOf(mPrefs.getString("lastWhere", Where.MAIN.toString()));
+        mLastWhat = mPrefs.getString("lastWhat", "ordbok");
 
-		mConnMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mConnMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-		mNeClient = new NeClient(NeClient.Auth.BASIC);
-		mNeClient.setPersistentAuthData(mPrefs.getString("persistentAuthData", null));
-		mNeClient.setUsername(mPrefs.getString("username", null));
-		mNeClient.setPassword(mPrefs.getString("password", null));
-	}
+        mNeClient = new NeClient(NeClient.Auth.BASIC);
+        mNeClient.setPersistentAuthData(mPrefs.getString("persistentAuthData", null));
+        mNeClient.setUsername(mPrefs.getString("username", null));
+        mNeClient.setPassword(mPrefs.getString("password", null));
+    }
 
-	public boolean isOnline() {
-		NetworkInfo networkInfo = mConnMgr.getActiveNetworkInfo();
-		return networkInfo != null && networkInfo.isConnected();
-	}
+    public boolean isOnline() {
+        NetworkInfo networkInfo = mConnMgr.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.isConnected();
+    }
 
-	public NeClient getNeClient() {
-		return mNeClient;
-	}
+    public NeClient getNeClient() {
+        return mNeClient;
+    }
 
-	public static Ordboken getInstance(Context context) {
-		if (sInstance == null) {
-			sInstance = new Ordboken(context);
-		}
+    public static Ordboken getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new Ordboken(context);
+        }
 
-		return sInstance;
-	}
+        return sInstance;
+    }
 
-	public void initCookies() {
-		if (mCookieSerializer != null) {
-			return;
-		}
+    public void initCookies() {
+        if (mCookieSerializer != null) {
+            return;
+        }
 
-		CookieManager cookieManager = new CookieManager();
-		CookieHandler.setDefault(cookieManager);
+        CookieManager cookieManager = new CookieManager();
+        CookieHandler.setDefault(cookieManager);
 
-		mCookieSerializer = new CookieSerializer(cookieManager.getCookieStore(), "www.ne.se");
-		mCookieSerializer.loadFromString(mPrefs.getString("cookies", null));
-	}
+        mCookieSerializer = new CookieSerializer(cookieManager.getCookieStore(), "www.ne.se");
+        mCookieSerializer.loadFromString(mPrefs.getString("cookies", null));
+    }
 
-	public void updateCreds(String username, String password) {
-		mNeClient.setUsername(username);
-		mNeClient.setPassword(password);
-	}
+    public void updateCreds(String username, String password) {
+        mNeClient.setUsername(username);
+        mNeClient.setPassword(password);
+    }
 
-	// Caller does the commit
-	@SuppressLint("CommitPrefEdits")
-	public SharedPreferences.Editor getPrefsEditor() {
-		SharedPreferences.Editor ed = mPrefs.edit();
+    // Caller does the commit
+    @SuppressLint("CommitPrefEdits")
+    public SharedPreferences.Editor getPrefsEditor() {
+        SharedPreferences.Editor ed = mPrefs.edit();
 
-		ed.putString("lastWhere", mLastWhere.toString());
-		ed.putString("lastWhat", mLastWhat);
-		ed.putString("persistentAuthData", mNeClient.getPersistentAuthData());
-		if (mCookieSerializer != null) {
-			ed.putString("cookies", mCookieSerializer.saveToString());
-		}
+        ed.putString("lastWhere", mLastWhere.toString());
+        ed.putString("lastWhat", mLastWhat);
+        ed.putString("persistentAuthData", mNeClient.getPersistentAuthData());
+        if (mCookieSerializer != null) {
+            ed.putString("cookies", mCookieSerializer.saveToString());
+        }
 
-		return ed;
-	}
+        return ed;
+    }
 
-	public SearchView initSearchView(Activity activity, Menu menu, String query, Boolean expanded) {
-		SearchManager searchManager = (SearchManager) activity
-				.getSystemService(Context.SEARCH_SERVICE);
-		SearchView searchView;
+    public SearchView initSearchView(Activity activity, Menu menu, String query, Boolean expanded) {
+        SearchManager searchManager = (SearchManager) activity
+                .getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView;
 
-		searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+        searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
 
-		searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(activity,
-				MainActivity.class)));
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(activity,
+                MainActivity.class)));
 
-		searchView.setIconifiedByDefault(!expanded);
-		searchView.setFocusable(false);
+        searchView.setIconifiedByDefault(!expanded);
+        searchView.setFocusable(false);
 
-		searchView.setSubmitButtonEnabled(true);
-		searchView.setQueryRefinementEnabled(true);
+        searchView.setSubmitButtonEnabled(true);
+        searchView.setQueryRefinementEnabled(true);
 
-		if (query != null) {
-			searchView.setQuery(query, false);
-		}
+        if (query != null) {
+            searchView.setQuery(query, false);
+        }
 
-		return searchView;
-	}
+        return searchView;
+    }
 
-	public boolean onOptionsItemSelected(Activity activity, MenuItem item) {
-		if (item.getItemId() == R.id.menu_logout) {
-			updateCreds("", "");
-			mNeClient.logout();
+    public boolean onOptionsItemSelected(Activity activity, MenuItem item) {
+        if (item.getItemId() == R.id.menu_logout) {
+            updateCreds("", "");
+            mNeClient.logout();
 
-			SharedPreferences.Editor ed = mPrefs.edit();
-			ed.putBoolean("loggedIn", false);
-			ed.putString("username", "");
-			ed.putString("password", "");
-			ed.commit();
+            SharedPreferences.Editor ed = mPrefs.edit();
+            ed.putBoolean("loggedIn", false);
+            ed.putString("username", "");
+            ed.putString("password", "");
+            ed.commit();
 
-			Intent intent = new Intent(mContext, LoginActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			mContext.startActivity(intent);
+            Intent intent = new Intent(mContext, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
 
-			activity.finish();
+            activity.finish();
 
-			return true;
-		}
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	public NeWord getCurrentWord() {
-		return mCurrentWord;
-	}
+    public NeWord getCurrentWord() {
+        return mCurrentWord;
+    }
 
-	public void setCurrentWord(NeWord word) {
-		mCurrentWord = word;
-	}
+    public void setCurrentWord(NeWord word) {
+        mCurrentWord = word;
+    }
 
-	public void setLastView(Where where, String what) {
-		mLastWhere = where;
-		mLastWhat = what;
-	}
+    public void setLastView(Where where, String what) {
+        mLastWhere = where;
+        mLastWhat = what;
+    }
 
-	public Where getLastWhere() {
-		return mLastWhere;
-	}
+    public Where getLastWhere() {
+        return mLastWhere;
+    }
 
-	public String getLastWhat() {
-		return mLastWhat;
-	}
+    public String getLastWhat() {
+        return mLastWhat;
+    }
 }

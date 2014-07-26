@@ -16,7 +16,6 @@
 
 package in.rab.ordboken;
 
-import in.rab.ordboken.NeClient.NeSearchResult;
 import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Context;
@@ -33,175 +32,179 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import in.rab.ordboken.NeClient.NeSearchResult;
+
 public class MainActivity extends ListActivity {
-	private Button mRetryButton;
-	private ProgressBar mProgressBar;
-	private TextView mStatusText;
-	private String mLastQuery;
-	private Ordboken mOrdboken;
-	private boolean mSeenResults;
+    private Button mRetryButton;
+    private ProgressBar mProgressBar;
+    private TextView mStatusText;
+    private String mLastQuery;
+    private Ordboken mOrdboken;
+    private boolean mSeenResults;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
 
-		mOrdboken = Ordboken.getInstance(this);
+        mOrdboken = Ordboken.getInstance(this);
 
-		if (mOrdboken.mPrefs.getBoolean("loggedIn", false) == false) {
-			startActivity(new Intent(this, LoginActivity.class));
-			finish();
-			return;
-		}
+        if (mOrdboken.mPrefs.getBoolean("loggedIn", false) == false) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
 
-		mProgressBar = (ProgressBar) findViewById(R.id.main_progress);
-		mStatusText = (TextView) findViewById(R.id.main_status);
-		mRetryButton = (Button) findViewById(R.id.main_retry);
+        mProgressBar = (ProgressBar) findViewById(R.id.main_progress);
+        mStatusText = (TextView) findViewById(R.id.main_status);
+        mRetryButton = (Button) findViewById(R.id.main_retry);
 
-		Intent intent = getIntent();
-		if (Intent.ACTION_SEARCH.equals(intent.getAction())
-				|| Intent.ACTION_VIEW.equals(intent.getAction())) {
-			onNewIntent(intent);
-		} else {
-			restoreLastView();
-		}
-	}
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())
+                || Intent.ACTION_VIEW.equals(intent.getAction())) {
+            onNewIntent(intent);
+        } else {
+            restoreLastView();
+        }
+    }
 
-	private void restoreLastView() {
-		Ordboken.Where where = mOrdboken.getLastWhere();
-		String what = mOrdboken.getLastWhat();
+    private void restoreLastView() {
+        Ordboken.Where where = mOrdboken.getLastWhere();
+        String what = mOrdboken.getLastWhat();
 
-		if (where == Ordboken.Where.MAIN) {
-			doSearch(what);
-		} else if (where == Ordboken.Where.WORD) {
-			openWord(null, what);
-			finish();
-		}
-	}
+        if (where == Ordboken.Where.MAIN) {
+            doSearch(what);
+        } else if (where == Ordboken.Where.WORD) {
+            openWord(null, what);
+            finish();
+        }
+    }
 
-	@Override
-	protected void onPause() {
-		super.onPause();
+    @Override
+    protected void onPause() {
+        super.onPause();
 
-		mOrdboken.setLastView(Ordboken.Where.MAIN, mLastQuery);
-		mOrdboken.getPrefsEditor().commit();
-	}
+        mOrdboken.setLastView(Ordboken.Where.MAIN, mLastQuery);
+        mOrdboken.getPrefsEditor().commit();
+    }
 
-	private void openWord(String word, String url) {
-		Intent intent = new Intent(this, WordActivity.class);
+    private void openWord(String word, String url) {
+        Intent intent = new Intent(this, WordActivity.class);
 
-		intent.putExtra("title", word);
-		intent.putExtra("url", url);
+        intent.putExtra("title", word);
+        intent.putExtra("url", url);
 
-		intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-		startActivity(intent);
-	}
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+    }
 
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
 
-		NeSearchResult searchResult = (NeSearchResult) l.getItemAtPosition(position);
-		openWord(searchResult.mTitle, searchResult.mUrl);
-	}
+        NeSearchResult searchResult = (NeSearchResult) l.getItemAtPosition(position);
+        openWord(searchResult.mTitle, searchResult.mUrl);
+    }
 
-	private class SearchResultAdapter extends ArrayAdapter<NeSearchResult> {
-		public SearchResultAdapter(Context context, NeSearchResult[] results) {
-			super(context, android.R.layout.simple_list_item_2, android.R.id.text1, results);
-		}
+    private class SearchResultAdapter extends ArrayAdapter<NeSearchResult> {
+        public SearchResultAdapter(Context context, NeSearchResult[] results) {
+            super(context, android.R.layout.simple_list_item_2, android.R.id.text1, results);
+        }
 
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View view = super.getView(position, convertView, parent);
-			TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-			TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-			NeSearchResult searchResult = getItem(position);
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = super.getView(position, convertView, parent);
+            TextView text1 = (TextView) view.findViewById(android.R.id.text1);
+            TextView text2 = (TextView) view.findViewById(android.R.id.text2);
+            NeSearchResult searchResult = getItem(position);
 
-			text1.setText(searchResult.mTitle);
-			text2.setText(searchResult.mSummary);
+            text1.setText(searchResult.mTitle);
+            text2.setText(searchResult.mSummary);
 
-			return view;
-		}
-	};
+            return view;
+        }
+    }
 
-	private class SearchTask extends AsyncTask<String, Void, NeSearchResult[]> {
-		@Override
-		protected NeSearchResult[] doInBackground(String... params) {
-			if (!mOrdboken.isOnline()) {
-				return null;
-			}
+    ;
 
-			try {
-				return mOrdboken.getNeClient().fetchSearchResults(params[0], 30);
-			} catch (Exception e) {
-				return null;
-			}
-		}
+    private class SearchTask extends AsyncTask<String, Void, NeSearchResult[]> {
+        @Override
+        protected NeSearchResult[] doInBackground(String... params) {
+            if (!mOrdboken.isOnline()) {
+                return null;
+            }
 
-		@Override
-		protected void onPostExecute(NeSearchResult[] results) {
-			mProgressBar.setVisibility(View.GONE);
+            try {
+                return mOrdboken.getNeClient().fetchSearchResults(params[0], 30);
+            } catch (Exception e) {
+                return null;
+            }
+        }
 
-			if (results == null) {
-				if (!mOrdboken.isOnline()) {
-					mStatusText.setText(R.string.error_offline);
-				} else {
-					mStatusText.setText(R.string.error_results);
-				}
-				mRetryButton.setVisibility(View.VISIBLE);
-				return;
-			}
+        @Override
+        protected void onPostExecute(NeSearchResult[] results) {
+            mProgressBar.setVisibility(View.GONE);
 
-			mSeenResults = true;
-			mStatusText.setText(R.string.no_results);
-			setListAdapter(new SearchResultAdapter(MainActivity.this, results));
-		}
-	}
+            if (results == null) {
+                if (!mOrdboken.isOnline()) {
+                    mStatusText.setText(R.string.error_offline);
+                } else {
+                    mStatusText.setText(R.string.error_results);
+                }
+                mRetryButton.setVisibility(View.VISIBLE);
+                return;
+            }
 
-	private void doSearch(String query) {
-		mProgressBar.setVisibility(View.VISIBLE);
-		mStatusText.setText(R.string.loading);
-		mRetryButton.setVisibility(View.GONE);
-		mLastQuery = query;
-		new SearchTask().execute(query);
-	}
+            mSeenResults = true;
+            mStatusText.setText(R.string.no_results);
+            setListAdapter(new SearchResultAdapter(MainActivity.this, results));
+        }
+    }
 
-	public void doSearchAgain(View view) {
-		doSearch(mLastQuery);
-	}
+    private void doSearch(String query) {
+        mProgressBar.setVisibility(View.VISIBLE);
+        mStatusText.setText(R.string.loading);
+        mRetryButton.setVisibility(View.GONE);
+        mLastQuery = query;
+        new SearchTask().execute(query);
+    }
 
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
+    public void doSearchAgain(View view) {
+        doSearch(mLastQuery);
+    }
 
-		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			String query = intent.getStringExtra(SearchManager.QUERY);
-			doSearch(query);
-		} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-			String url = intent.getDataString();
-			String word = intent.getStringExtra(SearchManager.EXTRA_DATA_KEY);
-			openWord(word, url);
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
 
-			if (!mSeenResults) {
-				finish();
-			}
-		}
-	}
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            doSearch(query);
+        } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            String url = intent.getDataString();
+            String word = intent.getStringExtra(SearchManager.EXTRA_DATA_KEY);
+            openWord(word, url);
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		mOrdboken.initSearchView(this, menu, mLastQuery, true);
-		return true;
-	}
+            if (!mSeenResults) {
+                finish();
+            }
+        }
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		if (mOrdboken.onOptionsItemSelected(this, item)) {
-			return true;
-		}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        mOrdboken.initSearchView(this, menu, mLastQuery, true);
+        return true;
+    }
 
-		return super.onOptionsItemSelected(item);
-	}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (mOrdboken.onOptionsItemSelected(this, item)) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }

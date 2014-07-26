@@ -29,105 +29,105 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class LoginActivity extends Activity {
-	private Ordboken mOrdboken;
-	private UserLoginTask mAuthTask = null;
-	private String mEmail;
-	private String mPassword;
-	private EditText mEmailView;
-	private EditText mPasswordView;
-	private View mLoginFormView;
-	private View mLoginStatusView;
+    private Ordboken mOrdboken;
+    private UserLoginTask mAuthTask = null;
+    private String mEmail;
+    private String mPassword;
+    private EditText mEmailView;
+    private EditText mPasswordView;
+    private View mLoginFormView;
+    private View mLoginStatusView;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_login);
 
-		mOrdboken = Ordboken.getInstance(this);
+        mOrdboken = Ordboken.getInstance(this);
 
-		mEmailView = (EditText) findViewById(R.id.email);
-		mEmailView.setText(mOrdboken.mPrefs.getString("username", ""));
+        mEmailView = (EditText) findViewById(R.id.email);
+        mEmailView.setText(mOrdboken.mPrefs.getString("username", ""));
 
-		mPasswordView = (EditText) findViewById(R.id.password);
-		mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-				if (id == R.id.login || id == EditorInfo.IME_NULL) {
-					attemptLogin();
-					return true;
-				}
-				return false;
-			}
-		});
+        mPasswordView = (EditText) findViewById(R.id.password);
+        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                    attemptLogin();
+                    return true;
+                }
+                return false;
+            }
+        });
 
-		mLoginFormView = findViewById(R.id.login_form);
-		mLoginStatusView = findViewById(R.id.login_status);
+        mLoginFormView = findViewById(R.id.login_form);
+        mLoginStatusView = findViewById(R.id.login_status);
 
-		findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				attemptLogin();
-			}
-		});
-	}
+        findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                attemptLogin();
+            }
+        });
+    }
 
-	public void attemptLogin() {
-		if (mAuthTask != null) {
-			return;
-		}
+    public void attemptLogin() {
+        if (mAuthTask != null) {
+            return;
+        }
 
-		mEmail = mEmailView.getText().toString();
-		mPassword = mPasswordView.getText().toString();
+        mEmail = mEmailView.getText().toString();
+        mPassword = mPasswordView.getText().toString();
 
-		showProgress(true);
-		mAuthTask = new UserLoginTask();
-		mAuthTask.execute((Void) null);
-	}
+        showProgress(true);
+        mAuthTask = new UserLoginTask();
+        mAuthTask.execute((Void) null);
+    }
 
-	private void showProgress(final boolean show) {
-		mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
-		mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-	}
+    private void showProgress(final boolean show) {
+        mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+    }
 
-	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			try {
-				return mOrdboken.getNeClient().login(mEmail, mPassword);
-			} catch (Exception e) {
-				return false;
-			}
-		}
+    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                return mOrdboken.getNeClient().login(mEmail, mPassword);
+            } catch (Exception e) {
+                return false;
+            }
+        }
 
-		@Override
-		protected void onPostExecute(final Boolean success) {
-			mAuthTask = null;
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mAuthTask = null;
 
-			if (!success) {
-				Toast.makeText(getApplicationContext(), R.string.error_login_failed,
-						Toast.LENGTH_SHORT).show();
-				showProgress(false);
-				mPasswordView.requestFocus();
-				return;
-			}
+            if (!success) {
+                Toast.makeText(getApplicationContext(), R.string.error_login_failed,
+                        Toast.LENGTH_SHORT).show();
+                showProgress(false);
+                mPasswordView.requestFocus();
+                return;
+            }
 
-			mOrdboken.updateCreds(mEmail, mPassword);
+            mOrdboken.updateCreds(mEmail, mPassword);
 
-			SharedPreferences.Editor ed = mOrdboken.getPrefsEditor();
-			ed.putBoolean("loggedIn", true);
-			ed.putString("username", mEmail);
-			ed.putString("password", mPassword);
-			ed.commit();
+            SharedPreferences.Editor ed = mOrdboken.getPrefsEditor();
+            ed.putBoolean("loggedIn", true);
+            ed.putString("username", mEmail);
+            ed.putString("password", mPassword);
+            ed.commit();
 
-			startActivity(new Intent(LoginActivity.this, MainActivity.class));
-			finish();
-		}
+            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            finish();
+        }
 
-		@Override
-		protected void onCancelled() {
-			mAuthTask = null;
-			showProgress(false);
-		}
-	}
+        @Override
+        protected void onCancelled() {
+            mAuthTask = null;
+            showProgress(false);
+        }
+    }
 }

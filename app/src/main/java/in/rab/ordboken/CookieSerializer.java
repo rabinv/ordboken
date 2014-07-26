@@ -16,59 +16,59 @@
 
 package in.rab.ordboken;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.URI;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 public class CookieSerializer {
-	private final CookieStore mCookieStore;
-	private final String mDomain;
+    private final CookieStore mCookieStore;
+    private final String mDomain;
 
-	public CookieSerializer(CookieStore cookieStore, String domain) {
-		mCookieStore = cookieStore;
-		mDomain = domain;
-	}
+    public CookieSerializer(CookieStore cookieStore, String domain) {
+        mCookieStore = cookieStore;
+        mDomain = domain;
+    }
 
-	public void loadFromString(String json) {
-		try {
-			JSONObject obj = new JSONObject(json);
-			JSONArray cookieStrings = obj.getJSONArray("cookies");
-			URI uri = new URI("http://" + mDomain);
+    public void loadFromString(String json) {
+        try {
+            JSONObject obj = new JSONObject(json);
+            JSONArray cookieStrings = obj.getJSONArray("cookies");
+            URI uri = new URI("http://" + mDomain);
 
-			for (int i = 0; i < cookieStrings.length(); i++) {
-				String cookieString = cookieStrings.getString(i);
-				HttpCookie cookie = HttpCookie.parse(cookieString).get(0);
+            for (int i = 0; i < cookieStrings.length(); i++) {
+                String cookieString = cookieStrings.getString(i);
+                HttpCookie cookie = HttpCookie.parse(cookieString).get(0);
 
-				cookie.setPath("/");
-				cookie.setDomain(mDomain);
+                cookie.setPath("/");
+                cookie.setDomain(mDomain);
 
-				mCookieStore.add(uri, cookie);
-			}
+                mCookieStore.add(uri, cookie);
+            }
 
-		} catch (Exception e) {
-			return;
-		}
-	}
+        } catch (Exception e) {
+            return;
+        }
+    }
 
-	public String saveToString() {
-		try {
-			URI uri = new URI("http://" + mDomain);
-			List<HttpCookie> cookies = mCookieStore.get(uri);
-			JSONObject obj = new JSONObject();
-			JSONArray cookieStrings = new JSONArray();
+    public String saveToString() {
+        try {
+            URI uri = new URI("http://" + mDomain);
+            List<HttpCookie> cookies = mCookieStore.get(uri);
+            JSONObject obj = new JSONObject();
+            JSONArray cookieStrings = new JSONArray();
 
-			for (HttpCookie cookie : cookies) {
-				cookieStrings.put(cookie.toString());
-			}
+            for (HttpCookie cookie : cookies) {
+                cookieStrings.put(cookie.toString());
+            }
 
-			obj.put("cookies", cookieStrings);
-			return obj.toString();
-		} catch (Exception e) {
-			return null;
-		}
-	}
+            obj.put("cookies", cookieStrings);
+            return obj.toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

@@ -16,8 +16,6 @@
 
 package in.rab.ordboken;
 
-import in.rab.ordboken.NeClient.NeSearchResult;
-import in.rab.ordboken.NeClient.NeWord;
 import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -26,63 +24,66 @@ import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import in.rab.ordboken.NeClient.NeSearchResult;
+import in.rab.ordboken.NeClient.NeWord;
+
 public class NeSuggestionProvider extends ContentProvider {
 
-	@Override
-	public int delete(Uri arg0, String arg1, String[] arg2) {
-		return 0;
-	}
+    @Override
+    public int delete(Uri arg0, String arg1, String[] arg2) {
+        return 0;
+    }
 
-	@Override
-	public String getType(Uri arg0) {
-		return null;
-	}
+    @Override
+    public String getType(Uri arg0) {
+        return null;
+    }
 
-	@Override
-	public Uri insert(Uri arg0, ContentValues arg1) {
-		return null;
-	}
+    @Override
+    public Uri insert(Uri arg0, ContentValues arg1) {
+        return null;
+    }
 
-	@Override
-	public boolean onCreate() {
-		return false;
-	}
+    @Override
+    public boolean onCreate() {
+        return false;
+    }
 
-	@Override
-	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-			String sortOrder) {
-		String[] columns = { BaseColumns._ID, SearchManager.SUGGEST_COLUMN_TEXT_1,
-				SearchManager.SUGGEST_COLUMN_TEXT_2, SearchManager.SUGGEST_COLUMN_INTENT_DATA,
-				SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA };
-		MatrixCursor cursor = new MatrixCursor(columns);
-		String q = uri.getLastPathSegment();
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+            String sortOrder) {
+        String[] columns = {BaseColumns._ID, SearchManager.SUGGEST_COLUMN_TEXT_1,
+                SearchManager.SUGGEST_COLUMN_TEXT_2, SearchManager.SUGGEST_COLUMN_INTENT_DATA,
+                SearchManager.SUGGEST_COLUMN_INTENT_EXTRA_DATA};
+        MatrixCursor cursor = new MatrixCursor(columns);
+        String q = uri.getLastPathSegment();
 
-		if (q.equals(SearchManager.SUGGEST_URI_PATH_QUERY)) {
-			NeWord lastWord = Ordboken.getInstance(getContext()).getCurrentWord();
+        if (q.equals(SearchManager.SUGGEST_URI_PATH_QUERY)) {
+            NeWord lastWord = Ordboken.getInstance(getContext()).getCurrentWord();
 
-			if (lastWord != null) {
-				cursor.addRow(new Object[] { 0, lastWord.mTitle, "", lastWord.mUrl, lastWord.mTitle });
-			}
-			return cursor;
-		}
+            if (lastWord != null) {
+                cursor.addRow(new Object[]{0, lastWord.mTitle, "", lastWord.mUrl, lastWord.mTitle});
+            }
+            return cursor;
+        }
 
-		try {
-			NeSearchResult[] results = Ordboken.getInstance(getContext()).getNeClient()
-					.fetchSearchResults(q, 10);
+        try {
+            NeSearchResult[] results = Ordboken.getInstance(getContext()).getNeClient()
+                    .fetchSearchResults(q, 10);
 
-			for (int i = 0; i < results.length; i++) {
-				cursor.addRow(new Object[] { i, results[i].mTitle, results[i].mSummary,
-						results[i].mUrl, results[i].mTitle });
-			}
-		} catch (Exception e) {
-			// Ignore all exceptions, this is just for the search suggestions.
-		}
+            for (int i = 0; i < results.length; i++) {
+                cursor.addRow(new Object[]{i, results[i].mTitle, results[i].mSummary,
+                        results[i].mUrl, results[i].mTitle});
+            }
+        } catch (Exception e) {
+            // Ignore all exceptions, this is just for the search suggestions.
+        }
 
-		return cursor;
-	}
+        return cursor;
+    }
 
-	@Override
-	public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3) {
-		return 0;
-	}
+    @Override
+    public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3) {
+        return 0;
+    }
 }
