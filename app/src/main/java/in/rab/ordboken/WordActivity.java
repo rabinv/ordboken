@@ -17,8 +17,11 @@
 package in.rab.ordboken;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
@@ -32,9 +35,11 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.ShareActionProvider;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +47,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.util.Date;
 
 import in.rab.ordboken.NeClient.NeWord;
 
@@ -83,6 +89,7 @@ public class WordActivity extends Activity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_word);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         mWebView = (WebView) findViewById(R.id.webView);
         WebSettings settings = mWebView.getSettings();
@@ -196,6 +203,8 @@ public class WordActivity extends Activity {
             mStatusLayout.setVisibility(View.GONE);
             mWebView.setVisibility(View.VISIBLE);
             updateShareIntent();
+
+            new HistorySaveTask().execute();
         }
     }
 
@@ -250,6 +259,23 @@ public class WordActivity extends Activity {
             });
 
             mediaPlayer.prepareAsync();
+        }
+    }
+
+    private class HistorySaveTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            OrdbokenDbHelper dbHelper = new OrdbokenDbHelper(WordActivity.this);
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            ContentValues values = new ContentValues();
+
+            values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE, mWord.mTitle);
+            values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_URL, mWord.mUrl);
+            values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_DATE, new Date().getTime());
+
+            db.insert(OrdbokenContract.HistoryEntry.TABLE_NAME, "null", values);
+
+            return null;
         }
     }
 

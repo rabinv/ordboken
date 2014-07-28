@@ -4,6 +4,10 @@ android {
     compileSdkVersion 19
     buildToolsVersion "20.0.0"
 
+    dependencies {
+        compile "com.android.support:support-v4:18.0.+"
+    }
+
     defaultConfig {
         applicationId "in.rab.ordboken"
         minSdkVersion 16

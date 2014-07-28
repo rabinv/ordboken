@@ -19,6 +19,7 @@ package in.rab.ordboken;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.SearchManager;
+import android.app.TaskStackBuilder;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.http.HttpResponseCache;
+import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SearchView;
@@ -166,9 +168,29 @@ public class Ordboken {
             activity.finish();
 
             return true;
+        } else if (item.getItemId() == android.R.id.home) {
+            Intent upIntent = NavUtils.getParentActivityIntent(activity);
+            if (NavUtils.shouldUpRecreateTask(activity, upIntent)) {
+                TaskStackBuilder.create(activity)
+                        .addNextIntentWithParentStack(upIntent)
+                        .startActivities();
+            } else {
+                NavUtils.navigateUpFromSameTask(activity);
+            }
+            return true;
         }
 
         return false;
+    }
+
+    void startWordActivity(Activity activity, String word, String url) {
+        Intent intent = new Intent(activity, WordActivity.class);
+
+        intent.putExtra("title", word);
+        intent.putExtra("url", url);
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        activity.startActivity(intent);
     }
 
     public NeWord getCurrentWord() {

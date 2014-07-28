@@ -47,6 +47,7 @@ public class MainActivity extends ListActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         mOrdboken = Ordboken.getInstance(this);
 
@@ -76,7 +77,7 @@ public class MainActivity extends ListActivity {
         if (where == Ordboken.Where.MAIN) {
             doSearch(what);
         } else if (where == Ordboken.Where.WORD) {
-            openWord(null, what);
+            mOrdboken.startWordActivity(this, null, what);
             finish();
         }
     }
@@ -89,22 +90,12 @@ public class MainActivity extends ListActivity {
         mOrdboken.getPrefsEditor().commit();
     }
 
-    private void openWord(String word, String url) {
-        Intent intent = new Intent(this, WordActivity.class);
-
-        intent.putExtra("title", word);
-        intent.putExtra("url", url);
-
-        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        startActivity(intent);
-    }
-
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
         NeSearchResult searchResult = (NeSearchResult) l.getItemAtPosition(position);
-        openWord(searchResult.mTitle, searchResult.mUrl);
+        mOrdboken.startWordActivity(this, searchResult.mTitle, searchResult.mUrl);
     }
 
     private class SearchResultAdapter extends ArrayAdapter<NeSearchResult> {
@@ -184,7 +175,7 @@ public class MainActivity extends ListActivity {
         } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             String url = intent.getDataString();
             String word = intent.getStringExtra(SearchManager.EXTRA_DATA_KEY);
-            openWord(word, url);
+            mOrdboken.startWordActivity(this, word, url);
 
             if (!mSeenResults) {
                 finish();
