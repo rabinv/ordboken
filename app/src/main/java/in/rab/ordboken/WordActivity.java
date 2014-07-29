@@ -263,6 +263,7 @@ public class WordActivity extends Activity {
         }
     }
 
+
     private class HistorySaveTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
@@ -271,6 +272,7 @@ public class WordActivity extends Activity {
             ContentValues values = new ContentValues();
 
             values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE, mWord.mTitle);
+            values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_SUMMARY, mWord.getSummary());
             values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_URL, mWord.mUrl);
             values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_DATE, new Date().getTime());
 
@@ -292,7 +294,7 @@ public class WordActivity extends Activity {
         protected boolean isStarred(SQLiteDatabase db) {
             Cursor cursor = db.query(OrdbokenContract.FavoritesEntry.TABLE_NAME, null,
                     OrdbokenContract.FavoritesEntry.COLUMN_NAME_URL + "=?",
-                    new String[] {mWord.mUrl}, null, null, null, "1");
+                    new String[]{mWord.mUrl}, null, null, null, "1");
             int count = cursor.getCount();
 
             cursor.close();
@@ -327,11 +329,12 @@ public class WordActivity extends Activity {
             if (starred) {
                 db.delete(OrdbokenContract.FavoritesEntry.TABLE_NAME,
                         OrdbokenContract.FavoritesEntry.COLUMN_NAME_URL + "=?",
-                        new String[] {mWord.mUrl});
+                        new String[]{mWord.mUrl});
             } else {
                 ContentValues values = new ContentValues();
 
                 values.put(OrdbokenContract.FavoritesEntry.COLUMN_NAME_TITLE, mWord.mTitle);
+                values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_SUMMARY, mWord.getSummary());
                 values.put(OrdbokenContract.FavoritesEntry.COLUMN_NAME_URL, mWord.mUrl);
 
                 db.insert(OrdbokenContract.FavoritesEntry.TABLE_NAME, "null", values);
@@ -364,8 +367,9 @@ public class WordActivity extends Activity {
         mOrdboken.setCurrentWord(mWord);
         updateShareIntent();
 
-        if (mWord != null)
+        if (mWord != null) {
             new StarUpdateTask().execute();
+        }
     }
 
     @Override

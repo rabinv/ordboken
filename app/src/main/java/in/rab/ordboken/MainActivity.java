@@ -117,8 +117,6 @@ public class MainActivity extends ListActivity {
         }
     }
 
-    ;
-
     private class SearchTask extends AsyncTask<String, Void, NeSearchResult[]> {
         @Override
         protected NeSearchResult[] doInBackground(String... params) {

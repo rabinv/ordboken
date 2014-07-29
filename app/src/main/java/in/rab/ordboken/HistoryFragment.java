@@ -12,6 +12,7 @@ public class HistoryFragment extends CommonListFragment {
         String[] projection = {
                 OrdbokenContract.HistoryEntry._ID,
                 OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE,
+                OrdbokenContract.HistoryEntry.COLUMN_NAME_SUMMARY,
                 OrdbokenContract.HistoryEntry.COLUMN_NAME_URL,
                 OrdbokenContract.HistoryEntry.COLUMN_NAME_DATE,
         };

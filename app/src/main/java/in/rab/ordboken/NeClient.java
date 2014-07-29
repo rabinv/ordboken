@@ -23,8 +23,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.net.Uri;
+import android.text.Html;
 import android.util.Base64;
-import android.util.Log;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -117,7 +117,18 @@ public class NeClient {
             this.mAudioUrl = mAudioUrl;
         }
 
-        private String getSelfUrl(JSONObject json, String url)  {
+        public String getSummary() {
+            String clean = Html.fromHtml((mText))
+                    .toString()
+                    .replace(mTitle, "")
+                    .trim();
+
+            return clean.substring(0, Math.min(100, clean.length()))
+                    .split("\n", 2)[0]
+                    .trim();
+        }
+
+        private String getSelfUrl(JSONObject json, String url) {
             try {
                 JSONArray relations = json.getJSONArray("relations");
                 int num = relations.length();

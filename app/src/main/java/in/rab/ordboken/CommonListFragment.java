@@ -41,9 +41,10 @@ public abstract class CommonListFragment extends ListFragment {
             Cursor cursor = getCursor(db);
 
             return new SimpleCursorAdapter(getActivity(),
-                    android.R.layout.simple_list_item_1, cursor,
-                    new String[]{OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE},
-                    new int[]{android.R.id.text1}, 0);
+                    android.R.layout.simple_list_item_2, cursor,
+                    new String[]{OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE,
+                            OrdbokenContract.HistoryEntry.COLUMN_NAME_SUMMARY},
+                    new int[]{android.R.id.text1, android.R.id.text2}, 0);
         }
 
         @Override

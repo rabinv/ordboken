@@ -12,6 +12,7 @@ public class FavoritesFragment extends CommonListFragment {
         String[] projection = {
                 OrdbokenContract.FavoritesEntry._ID,
                 OrdbokenContract.FavoritesEntry.COLUMN_NAME_TITLE,
+                OrdbokenContract.FavoritesEntry.COLUMN_NAME_SUMMARY,
                 OrdbokenContract.FavoritesEntry.COLUMN_NAME_URL,
         };
         String sortOrder = OrdbokenContract.FavoritesEntry.COLUMN_NAME_TITLE + " ASC";
