@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import android.net.Uri;
 import android.util.Base64;
+import android.util.Log;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -116,11 +117,35 @@ public class NeClient {
             this.mAudioUrl = mAudioUrl;
         }
 
+        private String getSelfUrl(JSONObject json, String url)  {
+            try {
+                JSONArray relations = json.getJSONArray("relations");
+                int num = relations.length();
+
+                for (int i = 0; i < num; i++) {
+                    JSONObject rel = relations.getJSONObject(i);
+
+                    if (rel.getString("rel").equals("self")) {
+                        return Uri.parse(url)
+                                .buildUpon()
+                                .path(rel.getString("url"))
+                                .toString();
+                    }
+                }
+            } catch (JSONException e) {
+                // Oh well
+            }
+
+            return url;
+        }
+
         public NeWord(String url, JSONObject json) throws JSONException {
-            mUrl = url;
             mTitle = json.getString("title");
             mSlug = json.getString("slug");
             mText = json.getString("text");
+
+            // Try to get the canonical URL to prevent duplicates in history
+            mUrl = getSelfUrl(json, url);
 
             // Audio is marked by an object data with an asset number we apparently can't
             // do anything with. To actually get the audio, we need to screen scrape the
