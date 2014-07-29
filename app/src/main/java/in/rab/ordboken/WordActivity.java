@@ -35,11 +35,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.ShareActionProvider;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,6 +78,7 @@ public class WordActivity extends Activity {
     private Button mRetryButton;
     private ShareActionProvider mShareActionProvider;
     private SearchView mSearchView;
+    private boolean mStarred;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +126,7 @@ public class WordActivity extends Activity {
             }
         });
 
+        mStarred = false;
         mProgressBar = (ProgressBar) findViewById(R.id.word_progress);
         mStatusText = (TextView) findViewById(R.id.word_status);
         mStatusLayout = (LinearLayout) findViewById(R.id.word_status_layout);
@@ -204,6 +204,7 @@ public class WordActivity extends Activity {
             mWebView.setVisibility(View.VISIBLE);
             updateShareIntent();
 
+            new StarUpdateTask().execute();
             new HistorySaveTask().execute();
         }
     }
@@ -274,8 +275,71 @@ public class WordActivity extends Activity {
             values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_DATE, new Date().getTime());
 
             db.insert(OrdbokenContract.HistoryEntry.TABLE_NAME, "null", values);
+            db.close();
 
             return null;
+        }
+    }
+
+    private abstract class StarTask extends AsyncTask<Void, Void, Boolean> {
+        protected SQLiteDatabase getDb() {
+            OrdbokenDbHelper dbHelper = new OrdbokenDbHelper(WordActivity.this);
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+            return db;
+        }
+
+        protected boolean isStarred(SQLiteDatabase db) {
+            Cursor cursor = db.query(OrdbokenContract.FavoritesEntry.TABLE_NAME, null,
+                    OrdbokenContract.FavoritesEntry.COLUMN_NAME_URL + "=?",
+                    new String[] {mWord.mUrl}, null, null, null, "1");
+            int count = cursor.getCount();
+
+            cursor.close();
+            return count > 0;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean starred) {
+            mStarred = starred;
+            invalidateOptionsMenu();
+        }
+    }
+
+    private class StarUpdateTask extends StarTask {
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            SQLiteDatabase db = getDb();
+            boolean starred = isStarred(db);
+
+            db.close();
+
+            return starred;
+        }
+    }
+
+    private class StarToggleTask extends StarTask {
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            SQLiteDatabase db = getDb();
+            boolean starred = isStarred(db);
+
+            if (starred) {
+                db.delete(OrdbokenContract.FavoritesEntry.TABLE_NAME,
+                        OrdbokenContract.FavoritesEntry.COLUMN_NAME_URL + "=?",
+                        new String[] {mWord.mUrl});
+            } else {
+                ContentValues values = new ContentValues();
+
+                values.put(OrdbokenContract.FavoritesEntry.COLUMN_NAME_TITLE, mWord.mTitle);
+                values.put(OrdbokenContract.FavoritesEntry.COLUMN_NAME_URL, mWord.mUrl);
+
+                db.insert(OrdbokenContract.FavoritesEntry.TABLE_NAME, "null", values);
+            }
+
+            db.close();
+
+            return !starred;
         }
     }
 
@@ -299,6 +363,9 @@ public class WordActivity extends Activity {
         super.onResume();
         mOrdboken.setCurrentWord(mWord);
         updateShareIntent();
+
+        if (mWord != null)
+            new StarUpdateTask().execute();
     }
 
     @Override
@@ -328,10 +395,26 @@ public class WordActivity extends Activity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem star = menu.findItem(R.id.menu_star);
+
+        if (mStarred) {
+            star.setIcon(R.drawable.ic_action_important);
+            star.setTitle("Unstar");
+        } else {
+            star.setIcon(R.drawable.ic_action_not_important);
+            star.setTitle("Star");
+        }
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
 
         menu.findItem(R.id.menu_resetzoom).setVisible(true);
+        menu.findItem(R.id.menu_star).setVisible(true);
 
         if (getPackageManager().queryIntentActivities(new Intent(FLASHCARD_ACTION), 0).size() > 0) {
             MenuItem shareItem = menu.findItem(R.id.menu_share);
@@ -354,6 +437,8 @@ public class WordActivity extends Activity {
             if (mWord != null) {
                 loadWebView(mWord);
             }
+        } else if (item.getItemId() == R.id.menu_star) {
+            new StarToggleTask().execute();
         }
 
         return super.onOptionsItemSelected(item);

@@ -20,7 +20,5 @@
     <string name="error_word">Hämtning misslyckades.</string>
     <string name="error_audio">Ljuduppspelning misslyckades.</string>
     <string name="no_results">Inga resultat hittades.</string>
-    <string name="title_activity_history">Historik</string>
-    <string name="action_settings">Settings</string>
 
 </resources>

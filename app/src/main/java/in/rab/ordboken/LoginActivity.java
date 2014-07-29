@@ -120,7 +120,7 @@ public class LoginActivity extends Activity {
             ed.putString("password", mPassword);
             ed.commit();
 
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            startActivity(new Intent(LoginActivity.this, HistoryActivity.class));
             finish();
         }
 

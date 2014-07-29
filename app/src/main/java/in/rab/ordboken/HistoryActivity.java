@@ -1,84 +1,92 @@
 package in.rab.ordboken;
 
-import android.app.ListActivity;
+import android.app.ActionBar;
+import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 
-public class HistoryActivity extends ListActivity {
+public class HistoryActivity extends FragmentActivity {
     private Ordboken mOrdboken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        final ActionBar actionBar = getActionBar();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
         mOrdboken = Ordboken.getInstance(this);
-        if (mOrdboken.mPrefs.getBoolean("loggedIn", false) == false) {
+        if (!mOrdboken.mPrefs.getBoolean("loggedIn", false)) {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
 
-        new HistoryTask().execute();
+        final ViewPager pager = (ViewPager) findViewById(R.id.viewPager);
+        pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
+        pager.setOnPageChangeListener(
+                new ViewPager.SimpleOnPageChangeListener() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        getActionBar().setSelectedNavigationItem(position);
+                    }
+                }
+        );
+
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+                pager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+            }
+
+            @Override
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+            }
+        };
+
+        actionBar.addTab(actionBar.newTab().
+                setText("Historik").
+                setTabListener(tabListener));
+        actionBar.addTab(actionBar.newTab().
+                setText("Favoriter").
+                setTabListener(tabListener));
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        new HistoryTask().execute();
-    }
-
-    private class HistoryTask extends AsyncTask<Void, Void, ListAdapter> {
-        @Override
-        protected ListAdapter doInBackground(Void... params) {
-            OrdbokenDbHelper dbHelper = new OrdbokenDbHelper(HistoryActivity.this);
-            SQLiteDatabase db = dbHelper.getReadableDatabase();
-            String[] projection = {
-                    OrdbokenContract.HistoryEntry._ID,
-                    OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE,
-                    OrdbokenContract.HistoryEntry.COLUMN_NAME_URL,
-                    OrdbokenContract.HistoryEntry.COLUMN_NAME_DATE,
-            };
-            String sortOrder = OrdbokenContract.HistoryEntry.COLUMN_NAME_DATE + " DESC";
-            Cursor cursor = db.query(OrdbokenContract.HistoryEntry.TABLE_NAME, projection,
-                                null, null, null, null, sortOrder);
-
-            return new SimpleCursorAdapter(HistoryActivity.this,
-                    android.R.layout.simple_list_item_1, cursor,
-                    new String[] {OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE},
-                    new int [] {android.R.id.text1}, 0);
+    private class MyPagerAdapter extends FragmentPagerAdapter {
+        public MyPagerAdapter(FragmentManager fm) {
+            super(fm);
         }
 
         @Override
-        protected void onPostExecute(ListAdapter adapter) {
-            setListAdapter(adapter);
+        public android.support.v4.app.Fragment getItem(int pos) {
+            switch (pos) {
+                case 1:
+                    return FavoritesFragment.newInstance();
+                default:
+                    return HistoryFragment.newInstance();
+            }
         }
-    }
 
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-
-        Cursor c = (Cursor) l.getItemAtPosition(position);
-        String title = c.getString(c.getColumnIndex(OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE));
-        String url = c.getString(c.getColumnIndex(OrdbokenContract.HistoryEntry.COLUMN_NAME_URL));
-
-        mOrdboken.startWordActivity(this, title, url);
+        @Override
+        public int getCount() {
+            return 2;
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         mOrdboken.initSearchView(this, menu, null, false);
         return true;
