@@ -9,27 +9,6 @@
         tools:ignore="AlwaysShowAction" />
 
     <item
-        android:id="@+id/menu_star"
-        android:icon="@android:drawable/btn_star_big_on"
-        android:showAsAction="ifRoom"
-        android:visible="false"
-        android:title="Star" />
-
-    <item
-        android:id="@+id/menu_share"
-        android:title="@string/menu_share"
-        android:showAsAction="ifRoom"
-        android:visible="false"
-        android:actionProviderClass="android.widget.ShareActionProvider" />
-
-    <item
-        android:id="@+id/menu_resetzoom"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:visible="false"
-        android:title="@string/menu_resetzoom" />
-
-    <item
         android:id="@+id/menu_logout"
         android:orderInCategory="100"
         android:showAsAction="never"

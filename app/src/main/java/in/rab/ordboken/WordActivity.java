@@ -417,10 +417,7 @@ public class WordActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-
-        menu.findItem(R.id.menu_resetzoom).setVisible(true);
-        menu.findItem(R.id.menu_star).setVisible(true);
+        getMenuInflater().inflate(R.menu.word, menu);
 
         if (getPackageManager().queryIntentActivities(new Intent(FLASHCARD_ACTION), 0).size() > 0) {
             MenuItem shareItem = menu.findItem(R.id.menu_share);
