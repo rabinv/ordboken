@@ -48,6 +48,8 @@ import java.net.URLDecoder;
 import java.util.Date;
 
 import in.rab.ordboken.NeClient.NeWord;
+import in.rab.ordboken.OrdbokenContract.FavoritesEntry;
+import in.rab.ordboken.OrdbokenContract.HistoryEntry;
 
 public class WordActivity extends Activity {
     private static final String FLASHCARD_ACTION = "org.openintents.action.CREATE_FLASHCARD";
@@ -271,12 +273,12 @@ public class WordActivity extends Activity {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
             ContentValues values = new ContentValues();
 
-            values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE, mWord.mTitle);
-            values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_SUMMARY, mWord.getSummary());
-            values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_URL, mWord.mUrl);
-            values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_DATE, new Date().getTime());
+            values.put(HistoryEntry.COLUMN_NAME_TITLE, mWord.mTitle);
+            values.put(HistoryEntry.COLUMN_NAME_SUMMARY, mWord.getSummary());
+            values.put(HistoryEntry.COLUMN_NAME_URL, mWord.mUrl);
+            values.put(HistoryEntry.COLUMN_NAME_DATE, new Date().getTime());
 
-            db.insert(OrdbokenContract.HistoryEntry.TABLE_NAME, "null", values);
+            db.insert(HistoryEntry.TABLE_NAME, "null", values);
             db.close();
 
             return null;
@@ -292,8 +294,8 @@ public class WordActivity extends Activity {
         }
 
         protected boolean isStarred(SQLiteDatabase db) {
-            Cursor cursor = db.query(OrdbokenContract.FavoritesEntry.TABLE_NAME, null,
-                    OrdbokenContract.FavoritesEntry.COLUMN_NAME_URL + "=?",
+            Cursor cursor = db.query(FavoritesEntry.TABLE_NAME, null,
+                    FavoritesEntry.COLUMN_NAME_URL + "=?",
                     new String[]{mWord.mUrl}, null, null, null, "1");
             int count = cursor.getCount();
 
@@ -327,17 +329,17 @@ public class WordActivity extends Activity {
             boolean starred = isStarred(db);
 
             if (starred) {
-                db.delete(OrdbokenContract.FavoritesEntry.TABLE_NAME,
-                        OrdbokenContract.FavoritesEntry.COLUMN_NAME_URL + "=?",
+                db.delete(FavoritesEntry.TABLE_NAME,
+                        FavoritesEntry.COLUMN_NAME_URL + "=?",
                         new String[]{mWord.mUrl});
             } else {
                 ContentValues values = new ContentValues();
 
-                values.put(OrdbokenContract.FavoritesEntry.COLUMN_NAME_TITLE, mWord.mTitle);
-                values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_SUMMARY, mWord.getSummary());
-                values.put(OrdbokenContract.FavoritesEntry.COLUMN_NAME_URL, mWord.mUrl);
+                values.put(FavoritesEntry.COLUMN_NAME_TITLE, mWord.mTitle);
+                values.put(HistoryEntry.COLUMN_NAME_SUMMARY, mWord.getSummary());
+                values.put(FavoritesEntry.COLUMN_NAME_URL, mWord.mUrl);
 
-                db.insert(OrdbokenContract.FavoritesEntry.TABLE_NAME, "null", values);
+                db.insert(FavoritesEntry.TABLE_NAME, "null", values);
             }
 
             db.close();

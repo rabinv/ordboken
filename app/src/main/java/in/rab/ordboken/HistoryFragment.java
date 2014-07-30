@@ -3,6 +3,8 @@ package in.rab.ordboken;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import in.rab.ordboken.OrdbokenContract.HistoryEntry;
+
 public class HistoryFragment extends CommonListFragment {
     public static HistoryFragment newInstance() {
         return new HistoryFragment();
@@ -10,14 +12,14 @@ public class HistoryFragment extends CommonListFragment {
 
     protected Cursor getCursor(SQLiteDatabase db) {
         String[] projection = {
-                OrdbokenContract.HistoryEntry._ID,
-                OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE,
-                OrdbokenContract.HistoryEntry.COLUMN_NAME_SUMMARY,
-                OrdbokenContract.HistoryEntry.COLUMN_NAME_URL,
-                OrdbokenContract.HistoryEntry.COLUMN_NAME_DATE,
+                HistoryEntry._ID,
+                HistoryEntry.COLUMN_NAME_TITLE,
+                HistoryEntry.COLUMN_NAME_SUMMARY,
+                HistoryEntry.COLUMN_NAME_URL,
+                HistoryEntry.COLUMN_NAME_DATE,
         };
-        String sortOrder = OrdbokenContract.HistoryEntry.COLUMN_NAME_DATE + " DESC";
-        return db.query(OrdbokenContract.HistoryEntry.TABLE_NAME, projection,
+        String sortOrder = HistoryEntry.COLUMN_NAME_DATE + " DESC";
+        return db.query(HistoryEntry.TABLE_NAME, projection,
                 null, null, null, null, sortOrder);
     }
 }
