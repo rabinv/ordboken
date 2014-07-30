@@ -16,6 +16,7 @@
 
 package in.rab.ordboken;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -90,7 +91,11 @@ public class WordActivity extends Activity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_word);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
+                | ActionBar.DISPLAY_HOME_AS_UP);
+        actionBar.setCustomView(R.layout.actionbar);
 
         mWebView = (WebView) findViewById(R.id.webView);
         WebSettings settings = mWebView.getSettings();

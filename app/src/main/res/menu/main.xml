@@ -2,13 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <item
-        android:id="@+id/menu_search"
-        android:title="@string/menu_search"
-        android:showAsAction="always"
-        android:actionViewClass="android.widget.SearchView"
-        tools:ignore="AlwaysShowAction" />
-
-    <item
         android:id="@+id/menu_logout"
         android:orderInCategory="100"
         android:showAsAction="never"

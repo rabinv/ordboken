@@ -16,6 +16,7 @@
 
 package in.rab.ordboken;
 
+import android.app.ActionBar;
 import android.app.ListActivity;
 import android.app.SearchManager;
 import android.content.Context;
@@ -47,7 +48,11 @@ public class MainActivity extends ListActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME
+                | ActionBar.DISPLAY_HOME_AS_UP);
+        actionBar.setCustomView(R.layout.actionbar);
 
         mOrdboken = Ordboken.getInstance(this);
 
@@ -184,7 +189,7 @@ public class MainActivity extends ListActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        mOrdboken.initSearchView(this, menu, mLastQuery, true);
+        mOrdboken.initSearchView(this, menu, mLastQuery, false);
         return true;
     }
 

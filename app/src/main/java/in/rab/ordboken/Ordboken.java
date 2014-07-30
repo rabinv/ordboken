@@ -126,20 +126,26 @@ public class Ordboken {
         return ed;
     }
 
-    public SearchView initSearchView(Activity activity, Menu menu, String query, Boolean expanded) {
+    public SearchView initSearchView(Activity activity, Menu menu, String query, Boolean focus) {
         SearchManager searchManager = (SearchManager) activity
                 .getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView;
-
-        searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+        SearchView searchView = (SearchView) activity.findViewById(R.id.mySearchView);
 
         searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(activity,
                 MainActivity.class)));
 
-        searchView.setIconifiedByDefault(!expanded);
-        searchView.setFocusable(false);
+        // Hack to get the magnifying glass icon inside the EditText
+        searchView.setIconifiedByDefault(true);
+        searchView.setIconified(false);
 
-        searchView.setSubmitButtonEnabled(true);
+        // Hack to get rid of the collapse button
+        searchView.onActionViewExpanded();
+
+        if (!focus) {
+            searchView.clearFocus();
+        }
+
+        // searchView.setSubmitButtonEnabled(true);
         searchView.setQueryRefinementEnabled(true);
 
         if (query != null) {

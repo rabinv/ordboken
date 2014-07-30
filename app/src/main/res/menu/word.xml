@@ -2,16 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <item
-        android:id="@+id/menu_search"
-        android:title="@string/menu_search"
-        android:showAsAction="always"
-        android:actionViewClass="android.widget.SearchView"
-        tools:ignore="AlwaysShowAction" />
-
-    <item
         android:id="@+id/menu_star"
         android:icon="@android:drawable/btn_star_big_on"
-        android:showAsAction="ifRoom"
+        android:showAsAction="never"
         android:visible="true"
         android:title="Star" />
 

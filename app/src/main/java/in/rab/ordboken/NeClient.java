@@ -48,8 +48,6 @@ public class NeClient {
         OAUTH2, BASIC
     }
 
-    ;
-
     public NeClient(Auth auth) {
         if (auth == Auth.OAUTH2) {
             authenticator = new Oauth2Authenticator();

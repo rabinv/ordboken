@@ -21,6 +21,9 @@ public class HistoryActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME);
+        actionBar.setCustomView(R.layout.actionbar);
+
         mOrdboken = Ordboken.getInstance(this);
         if (!mOrdboken.mPrefs.getBoolean("loggedIn", false)) {
             startActivity(new Intent(this, LoginActivity.class));
@@ -34,7 +37,7 @@ public class HistoryActivity extends FragmentActivity {
                 new ViewPager.SimpleOnPageChangeListener() {
                     @Override
                     public void onPageSelected(int position) {
-                        getActionBar().setSelectedNavigationItem(position);
+                        actionBar.setSelectedNavigationItem(position);
                     }
                 }
         );
@@ -88,7 +91,7 @@ public class HistoryActivity extends FragmentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        mOrdboken.initSearchView(this, menu, null, false);
+        mOrdboken.initSearchView(this, menu, null, true);
         return true;
     }
 
