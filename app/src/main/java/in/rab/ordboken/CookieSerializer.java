@@ -48,9 +48,8 @@ public class CookieSerializer {
 
                 mCookieStore.add(uri, cookie);
             }
-
         } catch (Exception e) {
-            return;
+            // No big deal if this fails.
         }
     }
 
