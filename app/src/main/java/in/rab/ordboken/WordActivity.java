@@ -104,7 +104,7 @@ public class WordActivity extends Activity {
         settings.setDisplayZoomControls(false);
         settings.setJavaScriptEnabled(true);
 
-        mWebView.setInitialScale(mOrdboken.mPrefs.getInt("scale", 100));
+        mWebView.setInitialScale(mOrdboken.mPrefs.getInt("scale", 0));
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -439,7 +439,7 @@ public class WordActivity extends Activity {
         }
 
         if (item.getItemId() == R.id.menu_resetzoom) {
-            mWebView.setInitialScale(100);
+            mWebView.setInitialScale(0);
             if (mWord != null) {
                 loadWebView(mWord);
             }
