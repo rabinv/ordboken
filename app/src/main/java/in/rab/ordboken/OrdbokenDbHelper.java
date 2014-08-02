@@ -6,31 +6,33 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import in.rab.ordboken.OrdbokenContract.FavoritesEntry;
+import in.rab.ordboken.OrdbokenContract.HistoryEntry;
+
 public class OrdbokenDbHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 8;
     public static final String DATBASE_NAME = "Ordboken.db";
     private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + OrdbokenContract.HistoryEntry.TABLE_NAME + " (" +
-                    OrdbokenContract.HistoryEntry._ID + " INTEGER PRIMARY KEY," +
-                    OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE + " TEXT," +
-                    OrdbokenContract.HistoryEntry.COLUMN_NAME_SUMMARY + " TEXT," +
-                    // FIXME XXX DISTINGUISH MULTIPLE TEXTS!
-                    OrdbokenContract.HistoryEntry.COLUMN_NAME_URL + " TEXT," +
-                    OrdbokenContract.HistoryEntry.COLUMN_NAME_DATE + " INTEGER," +
-                    "UNIQUE (" +  OrdbokenContract.HistoryEntry.COLUMN_NAME_URL +
+            "CREATE TABLE " + HistoryEntry.TABLE_NAME + " (" +
+                    HistoryEntry._ID + " INTEGER PRIMARY KEY," +
+                    HistoryEntry.COLUMN_NAME_TITLE + " TEXT," +
+                    HistoryEntry.COLUMN_NAME_SUMMARY + " TEXT," +
+                    HistoryEntry.COLUMN_NAME_URL + " TEXT," +
+                    HistoryEntry.COLUMN_NAME_DATE + " INTEGER," +
+                    "UNIQUE (" + HistoryEntry.COLUMN_NAME_URL +
                     ") ON CONFLICT REPLACE" +
                     " )";
     private static final String SQL_CREATE_ENTRIES2 =
-            "CREATE TABLE " + OrdbokenContract.FavoritesEntry.TABLE_NAME + "(" +
-                    OrdbokenContract.FavoritesEntry._ID + " INTEGER PRIMARY KEY," +
-                    OrdbokenContract.FavoritesEntry.COLUMN_NAME_TITLE + " TEXT," +
-                    OrdbokenContract.FavoritesEntry.COLUMN_NAME_SUMMARY + " TEXT," +
-                    OrdbokenContract.FavoritesEntry.COLUMN_NAME_URL + " TEXT UNIQUE" +
+            "CREATE TABLE " + FavoritesEntry.TABLE_NAME + "(" +
+                    FavoritesEntry._ID + " INTEGER PRIMARY KEY," +
+                    FavoritesEntry.COLUMN_NAME_TITLE + " TEXT," +
+                    FavoritesEntry.COLUMN_NAME_SUMMARY + " TEXT," +
+                    FavoritesEntry.COLUMN_NAME_URL + " TEXT UNIQUE" +
                     " )";
     private static final String SQL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + OrdbokenContract.HistoryEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + HistoryEntry.TABLE_NAME;
     private static final String SQL_DELETE_ENTRIES2 =
-            "DROP TABLE IF EXISTS " + OrdbokenContract.FavoritesEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + FavoritesEntry.TABLE_NAME;
 
     public OrdbokenDbHelper(Context context) {
         super(context, DATBASE_NAME, null, DATABASE_VERSION);
@@ -44,12 +46,12 @@ public class OrdbokenDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_ENTRIES2);
 
         ContentValues values = new ContentValues();
-        values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_TITLE, "ordbok");
-        values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_URL, "http://api.ne.se/ordbok/svensk/ordbok");
-        values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_SUMMARY, "");
-        values.put(OrdbokenContract.HistoryEntry.COLUMN_NAME_DATE, 0);
+        values.put(HistoryEntry.COLUMN_NAME_TITLE, "ordbok");
+        values.put(HistoryEntry.COLUMN_NAME_URL, "http://api.ne.se/ordbok/svensk/ordbok");
+        values.put(HistoryEntry.COLUMN_NAME_SUMMARY, "");
+        values.put(HistoryEntry.COLUMN_NAME_DATE, 0);
 
-        db.insertOrThrow(OrdbokenContract.HistoryEntry.TABLE_NAME, "null", values);
+        db.insertOrThrow(HistoryEntry.TABLE_NAME, "null", values);
     }
 
     @Override

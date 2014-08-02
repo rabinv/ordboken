@@ -108,10 +108,10 @@ public class WordActivity extends Activity {
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url.indexOf("/playAudio") != -1) {
+                if (url.contains("/playAudio")) {
                     setProgressBarIndeterminateVisibility(true);
                     new AudioTask().execute();
-                } else if (url.indexOf("/search/") != -1) {
+                } else if (url.contains("/search/")) {
                     String word = url.substring(url.indexOf("ch/") + 3);
 
                     try {
@@ -293,9 +293,7 @@ public class WordActivity extends Activity {
     private abstract class StarTask extends AsyncTask<Void, Void, Boolean> {
         protected SQLiteDatabase getDb() {
             OrdbokenDbHelper dbHelper = new OrdbokenDbHelper(WordActivity.this);
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-            return db;
+            return dbHelper.getWritableDatabase();
         }
 
         protected boolean isStarred(SQLiteDatabase db) {

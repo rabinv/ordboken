@@ -163,11 +163,7 @@ public class NeClient {
             // (example, with a slug of "labb-(2)"), we would have to use the full site search
             // feature first which I'm not going to do. Let's just not support audio for those
             // words, and hope that this API is fixed soon.
-            if (mText.indexOf("<object data") != -1 && mSlug.indexOf("-(") == -1) {
-                mHasAudio = true;
-            } else {
-                mHasAudio = false;
-            }
+            mHasAudio = mText.contains("<object data") && !mSlug.contains("-(");
         }
     }
 
@@ -230,7 +226,7 @@ public class NeClient {
             }
 
             String location = https.getHeaderField("Location");
-            if (location.indexOf("/success") == -1) {
+            if (!location.contains("/success")) {
                 throw new LoginException("Failed to login");
             }
         } finally {

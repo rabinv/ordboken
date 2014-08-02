@@ -56,7 +56,7 @@ public class MainActivity extends ListActivity {
 
         mOrdboken = Ordboken.getInstance(this);
 
-        if (mOrdboken.mPrefs.getBoolean("loggedIn", false) == false) {
+        if (!mOrdboken.mPrefs.getBoolean("loggedIn", false)) {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
