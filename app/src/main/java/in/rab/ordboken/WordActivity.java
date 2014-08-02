@@ -411,10 +411,10 @@ public class WordActivity extends Activity {
 
         if (mStarred) {
             star.setIcon(R.drawable.ic_action_important);
-            star.setTitle("Unstar");
+            star.setTitle(getString(R.string.remove_bookmark));
         } else {
             star.setIcon(R.drawable.ic_action_not_important);
-            star.setTitle("Star");
+            star.setTitle(getString(R.string.add_bookmark));
         }
 
         return super.onPrepareOptionsMenu(menu);

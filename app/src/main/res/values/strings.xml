@@ -13,6 +13,7 @@
     <string name="prompt_password">Lösenord</string>
     <string name="signing_in">Loggar in…</string>
     <string name="loading">Laddar…</string>
+    <string name="empty">Tom.</string>
     <string name="tryagain">Försök igen</string>
     <string name="error_login_failed">Inloggning misslyckades.</string>
     <string name="error_offline">Ingen anslutning.</string>
@@ -20,5 +21,9 @@
     <string name="error_word">Hämtning misslyckades.</string>
     <string name="error_audio">Ljuduppspelning misslyckades.</string>
     <string name="no_results">Inga resultat hittades.</string>
+    <string name="history">Historik</string>
+    <string name="bookmarks">Bokmärken</string>
+    <string name="add_bookmark">Lägg till bokmärke</string>
+    <string name="remove_bookmark">Radera bokmärke</string>
 
 </resources>

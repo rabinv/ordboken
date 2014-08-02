@@ -60,10 +60,10 @@ public class HistoryActivity extends FragmentActivity {
         };
 
         actionBar.addTab(actionBar.newTab().
-                setText("Historik").
+                setText(getString(R.string.history)).
                 setTabListener(tabListener));
         actionBar.addTab(actionBar.newTab().
-                setText("Favoriter").
+                setText(getString(R.string.bookmarks)).
                 setTabListener(tabListener));
     }
 
