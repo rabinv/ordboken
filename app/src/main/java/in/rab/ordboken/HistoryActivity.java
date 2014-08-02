@@ -32,7 +32,7 @@ public class HistoryActivity extends FragmentActivity {
         }
 
         final ViewPager pager = (ViewPager) findViewById(R.id.viewPager);
-        pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
+        pager.setAdapter(new TabPagerAdapter(getSupportFragmentManager()));
         pager.setOnPageChangeListener(
                 new ViewPager.SimpleOnPageChangeListener() {
                     @Override
@@ -67,8 +67,8 @@ public class HistoryActivity extends FragmentActivity {
                 setTabListener(tabListener));
     }
 
-    private class MyPagerAdapter extends FragmentPagerAdapter {
-        public MyPagerAdapter(FragmentManager fm) {
+    private class TabPagerAdapter extends FragmentPagerAdapter {
+        public TabPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 

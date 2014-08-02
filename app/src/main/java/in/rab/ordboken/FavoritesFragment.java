@@ -6,6 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import in.rab.ordboken.OrdbokenContract.FavoritesEntry;
 
 public class FavoritesFragment extends CommonListFragment {
+    public FavoritesFragment() {
+        super(FavoritesEntry.TABLE_NAME);
+    }
+
     public static FavoritesFragment newInstance() {
         return new FavoritesFragment();
     }

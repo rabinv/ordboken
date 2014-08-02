@@ -6,6 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import in.rab.ordboken.OrdbokenContract.HistoryEntry;
 
 public class HistoryFragment extends CommonListFragment {
+    public HistoryFragment() {
+        super(HistoryEntry.TABLE_NAME);
+    }
+
     public static HistoryFragment newInstance() {
         return new HistoryFragment();
     }

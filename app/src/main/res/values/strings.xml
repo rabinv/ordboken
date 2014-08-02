@@ -25,5 +25,7 @@
     <string name="bookmarks">Bokmärken</string>
     <string name="add_bookmark">Lägg till bokmärke</string>
     <string name="remove_bookmark">Radera bokmärke</string>
+    <string name="delete">Ta bort</string>
+    <string name="delete_all">Ta bort alla</string>
 
 </resources>

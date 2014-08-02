@@ -5,9 +5,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -16,9 +20,11 @@ import in.rab.ordboken.OrdbokenContract.HistoryEntry;
 
 public abstract class CommonListFragment extends ListFragment {
     private Ordboken mOrdboken;
+    private String mTable;
 
-    public CommonListFragment() {
+    public CommonListFragment(String table) {
         mOrdboken = Ordboken.getInstance(getActivity());
+        mTable = table;
     }
 
     @Override
@@ -66,5 +72,75 @@ public abstract class CommonListFragment extends ListFragment {
         String url = c.getString(c.getColumnIndex(HistoryEntry.COLUMN_NAME_URL));
 
         mOrdboken.startWordActivity(getActivity(), title, url);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        registerForContextMenu(getListView());
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+            ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        MenuInflater inflater = getActivity().getMenuInflater();
+        inflater.inflate(R.menu.list, menu);
+    }
+
+    private class DeleteTask extends AsyncTask<String, Void, Void> {
+        @Override
+        protected Void doInBackground(String... params) {
+            String url = params[0];
+            OrdbokenDbHelper dbHelper = new OrdbokenDbHelper(getActivity());
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+            if (url == null) {
+                db.delete(mTable, null, null);
+            } else {
+                db.delete(mTable, HistoryEntry.COLUMN_NAME_URL + "=?", new String[]{url});
+            }
+
+            db.close();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            new HistoryTask().execute();
+        }
+    }
+
+    private boolean deleteItem(Cursor cursor) {
+        String url = cursor.getString(cursor.getColumnIndex(HistoryEntry.COLUMN_NAME_URL));
+        new DeleteTask().execute(url);
+        return true;
+    }
+
+    private boolean deleteAll() {
+        new DeleteTask().execute((String) null);
+        return true;
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        // This gets called on all fragments; this hack(?) makes us operate
+        // on the correct one only.
+        if (!getUserVisibleHint()) {
+            return false;
+        }
+
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        Cursor c = (Cursor) getListAdapter().getItem(info.position);
+
+        switch (item.getItemId()) {
+            case R.id.delete:
+                return deleteItem(c);
+            case R.id.delete_all:
+                return deleteAll();
+            default:
+                return super.onContextItemSelected(item);
+        }
     }
 }
