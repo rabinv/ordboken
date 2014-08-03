@@ -189,7 +189,7 @@ public class Ordboken {
         return false;
     }
 
-    void startWordActivity(Activity activity, String word, String url) {
+    static void startWordActivity(Activity activity, String word, String url) {
         Intent intent = new Intent(activity, WordActivity.class);
 
         intent.putExtra("title", word);

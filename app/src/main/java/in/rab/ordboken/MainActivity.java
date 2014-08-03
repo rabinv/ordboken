@@ -82,7 +82,7 @@ public class MainActivity extends ListActivity {
         if (where == Ordboken.Where.MAIN) {
             doSearch(what);
         } else if (where == Ordboken.Where.WORD) {
-            mOrdboken.startWordActivity(this, null, what);
+            Ordboken.startWordActivity(this, null, what);
             finish();
         }
     }
@@ -100,7 +100,7 @@ public class MainActivity extends ListActivity {
         super.onListItemClick(l, v, position, id);
 
         NeSearchResult searchResult = (NeSearchResult) l.getItemAtPosition(position);
-        mOrdboken.startWordActivity(this, searchResult.mTitle, searchResult.mUrl);
+        Ordboken.startWordActivity(this, searchResult.mTitle, searchResult.mUrl);
     }
 
     private class SearchResultAdapter extends ArrayAdapter<NeSearchResult> {
@@ -178,7 +178,7 @@ public class MainActivity extends ListActivity {
         } else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             String url = intent.getDataString();
             String word = intent.getStringExtra(SearchManager.EXTRA_DATA_KEY);
-            mOrdboken.startWordActivity(this, word, url);
+            Ordboken.startWordActivity(this, word, url);
 
             if (!mSeenResults) {
                 finish();

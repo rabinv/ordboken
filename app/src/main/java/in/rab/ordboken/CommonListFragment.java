@@ -19,11 +19,9 @@ import android.widget.SimpleCursorAdapter;
 import in.rab.ordboken.OrdbokenContract.HistoryEntry;
 
 public abstract class CommonListFragment extends ListFragment {
-    private Ordboken mOrdboken;
     private String mTable;
 
     public CommonListFragment(String table) {
-        mOrdboken = Ordboken.getInstance(getActivity());
         mTable = table;
     }
 
@@ -71,7 +69,7 @@ public abstract class CommonListFragment extends ListFragment {
                 .getString(c.getColumnIndex(HistoryEntry.COLUMN_NAME_TITLE));
         String url = c.getString(c.getColumnIndex(HistoryEntry.COLUMN_NAME_URL));
 
-        mOrdboken.startWordActivity(getActivity(), title, url);
+        Ordboken.startWordActivity(getActivity(), title, url);
     }
 
     @Override
