@@ -24,6 +24,6 @@ public class HistoryFragment extends CommonListFragment {
         };
         String sortOrder = HistoryEntry.COLUMN_NAME_DATE + " DESC";
         return db.query(HistoryEntry.TABLE_NAME, projection,
-                null, null, null, null, sortOrder);
+                null, null, null, null, sortOrder, "100");
     }
 }
