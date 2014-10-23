@@ -156,14 +156,8 @@ public class NeClient {
             // Try to get the canonical URL to prevent duplicates in history
             mUrl = getSelfUrl(json, url);
 
-            // Audio is marked by an object data with an asset number we apparently can't
-            // do anything with. To actually get the audio, we need to screen scrape the
-            // full site. Since there is also no relation between the API urls and the full
-            // site's urls, in order to find the full site url for a word with multiple meanings
-            // (example, with a slug of "labb-(2)"), we would have to use the full site search
-            // feature first which I'm not going to do. Let's just not support audio for those
-            // words, and hope that this API is fixed soon.
-            mHasAudio = mText.contains("<object data") && !mSlug.contains("-(");
+            // No audio in the new website
+            mHasAudio = false;
         }
     }
 
