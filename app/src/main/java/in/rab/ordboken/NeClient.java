@@ -156,8 +156,10 @@ public class NeClient {
             // Try to get the canonical URL to prevent duplicates in history
             mUrl = getSelfUrl(json, url);
 
-            // No audio in the new website
-            mHasAudio = false;
+            // Audio is marked by an object data with an asset number we apparently can't
+            // do anything with. To actually get the audio, we need to screen scrape the
+            // full site.
+            mHasAudio = mText.contains("<object data");
         }
     }
 
@@ -166,18 +168,18 @@ public class NeClient {
             return word.getAudioUrl();
         }
 
-        Uri.Builder uriBuilder = Uri.parse("https://www.ne.se/sve/").buildUpon();
+        Uri.Builder uriBuilder = Uri.parse("https://www.ne.se/uppslagsverk/ordbok/svensk/").buildUpon();
         uriBuilder.appendPath(word.mSlug);
 
         String page = fetchMainSitePage(uriBuilder.build().toString());
-        Pattern regex = Pattern.compile("(neosound_mp3/.*?mp3)");
+        Pattern regex = Pattern.compile("(http://assets.*?mp3)");
         Matcher matcher = regex.matcher(page);
 
         if (!matcher.find()) {
             throw new ParserException("Could not find audio url in page");
         }
 
-        String url = "http://www.ne.se/" + matcher.group(1);
+        String url = matcher.group(1);
         word.setAudioUrl(url);
 
         return url;
@@ -195,15 +197,13 @@ public class NeClient {
     private void loginMainSite() throws IOException, LoginException {
         ArrayList<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
 
-        data.add(new BasicNameValuePair("_save_loginForm", "true"));
-        data.add(new BasicNameValuePair("redir", "/success"));
-        data.add(new BasicNameValuePair("redirFail", "/fail"));
-        data.add(new BasicNameValuePair("userName", mUsername));
-        data.add(new BasicNameValuePair("passWord", mPassword));
+        data.add(new BasicNameValuePair("remember_me", "true"));
+        data.add(new BasicNameValuePair("username", mUsername));
+        data.add(new BasicNameValuePair("password", mPassword));
 
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data);
 
-        URL url = new URL("https://www.ne.se/user/login.jsp");
+        URL url = new URL("https://auth.ne.se/login");
         HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
         https.setInstanceFollowRedirects(false);
         https.setFixedLengthStreamingMode((int) entity.getContentLength());
@@ -219,8 +219,10 @@ public class NeClient {
                 throw new LoginException("Unexpected response: " + response);
             }
 
+            // http://auth.ne.se/login?failed=true on failure
+            // http://auth.ne.se/ on success
             String location = https.getHeaderField("Location");
-            if (!location.contains("/success")) {
+            if (location.contains("fail")) {
                 throw new LoginException("Failed to login");
             }
         } finally {
