@@ -7,7 +7,7 @@
     <string name="menu_search">Sök</string>
     <string name="menu_resetzoom">Återställa zoom</string>
     <string name="search_hint">Sök i ordboken</string>
-    <string name="sign_in_info">Logga in med ditt NE.se konto.</string>
+    <string name="sign_in_info">Logga in med ditt NE.se-konto.</string>
     <string name="sign_in">Logga in</string>
     <string name="prompt_email">E-post</string>
     <string name="prompt_password">Lösenord</string>
