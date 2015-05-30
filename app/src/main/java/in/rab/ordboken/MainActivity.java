@@ -130,7 +130,7 @@ public class MainActivity extends ListActivity {
             }
 
             try {
-                return mOrdboken.getNeClient().fetchSearchResults(params[0], 30);
+                return mOrdboken.getNeClient().fetchSearchResults(params[0], 50);
             } catch (Exception e) {
                 return null;
             }
