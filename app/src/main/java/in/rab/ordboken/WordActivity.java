@@ -46,6 +46,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Date;
 
 import in.rab.ordboken.NeClient.NeWord;
@@ -169,6 +170,26 @@ public class WordActivity extends Activity {
 
         if (word.mHasAudio) {
             text = text.replace("</object>", "</object><a class='sound' href='/playAudio'></a>");
+        }
+
+        ArrayList<NeClient.NeSearchResult> relations = word.mRelations;
+        if (relations.size() > 0) {
+            StringBuilder builder = new StringBuilder();
+            int i;
+
+            builder.append("<br><span class='neokap'>REL.:</span><span class='neopetit'>");
+
+            for (NeClient.NeSearchResult relation : relations) {
+                builder.append(" <a href='")
+                        .append(relation.mUrl)
+                        .append("'>")
+                        .append(relation.mTitle)
+                        .append("</a>");
+            }
+
+            builder.append("</span>");
+
+            text += builder.toString();
         }
 
         mWebView.loadDataWithBaseURL("http://api.ne.se/", CSS + text + javascript, "text/html",

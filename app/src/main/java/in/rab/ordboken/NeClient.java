@@ -91,6 +91,12 @@ public class NeClient {
             mUrl = url;
         }
 
+        public NeSearchResult(String title, String url) {
+            mTitle = title;
+            mSummary = "";
+            mUrl = url;
+        }
+
         public NeSearchResult(JSONObject json) throws JSONException {
             mTitle = json.getString("title");
             mSummary = json.getString("summary").replace("\n", "");
@@ -103,6 +109,7 @@ public class NeClient {
         public final String mText;
         public final String mSlug;
         public final String mUrl;
+        public final ArrayList<NeSearchResult> mRelations;
         public final boolean mHasAudio;
 
         private String mAudioUrl;
@@ -148,6 +155,34 @@ public class NeClient {
             return url;
         }
 
+        private ArrayList<NeSearchResult> getRelatedWords(JSONObject json) {
+            ArrayList<NeSearchResult> results = new ArrayList<NeSearchResult>();
+
+            try {
+                JSONArray relations = json.getJSONArray("relations");
+                int num = relations.length();
+
+                for (int i = 0; i < num; i++) {
+                    JSONObject rel = relations.getJSONObject(i);
+
+                    if (!rel.getString("rel").equals("related") ||
+                            !rel.getString("type").equals("ordbok")) {
+                        continue;
+                    }
+
+                    results.add(new NeSearchResult(rel.getString("value"),
+                            Uri.parse(mUrl)
+                                    .buildUpon()
+                                    .path(rel.getString("url"))
+                                    .toString()));
+                }
+            } catch (JSONException e) {
+                // Oh well
+            }
+
+            return results;
+        }
+
         public NeWord(String url, JSONObject json) throws JSONException {
             mTitle = json.getString("title");
             mSlug = json.getString("slug");
@@ -155,6 +190,7 @@ public class NeClient {
 
             // Try to get the canonical URL to prevent duplicates in history
             mUrl = getSelfUrl(json, url);
+            mRelations = getRelatedWords(json);
 
             // Audio is marked by an object data with an asset number we apparently can't
             // do anything with. To actually get the audio, we need to screen scrape the
