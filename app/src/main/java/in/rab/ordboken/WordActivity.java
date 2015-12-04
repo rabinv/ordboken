@@ -57,11 +57,12 @@ public class WordActivity extends Activity {
     private static final String FLASHCARD_ACTION = "org.openintents.action.CREATE_FLASHCARD";
     private static final String CSS = "<style>"
             + "p.headword { display: none; }"
+            + "p.headword + p { margin: 0; }"
+            + "p:nth-of-type(3) { margin: 0; };"
             + "object { display: none; }"
             + ".neopetit { font-size: 90%; }"
             + ".neokap { font-size: 80%; }"
             + "br { display: block; margin-top: 0.25em; content: ' '; } "
-            + "p { margin: 0; }"
             + "a.sound { "
             + "	text-decoration: none;"
             + "	width: 16px; height: 16px;"
