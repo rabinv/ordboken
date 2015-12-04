@@ -59,6 +59,7 @@ public class WordActivity extends Activity {
             + "object { display: none; }"
             + ".neopetit { font-size: 90%; }"
             + ".neokap { font-size: 90%; }"
+            + "br { display: block; margin-top: 0.25em; content: ' '; } "
             + "p { margin: 0; }"
             + "a.sound { "
             + "	text-decoration: none;"
