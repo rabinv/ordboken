@@ -28,12 +28,10 @@ import android.util.Base64;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -221,15 +219,6 @@ public class NeClient {
         return url;
     }
 
-    private String inputStreamToString(InputStream input) throws IOException {
-        Scanner scanner = new Scanner(input).useDelimiter("\\A");
-        String str = scanner.hasNext() ? scanner.next() : "";
-
-        input.close();
-
-        return str;
-    }
-
     private void loginMainSite() throws IOException, LoginException {
         ArrayList<BasicNameValuePair> data = new ArrayList<BasicNameValuePair>();
 
@@ -310,7 +299,7 @@ public class NeClient {
                 throw new ParserException("Unable to get page: " + response);
             }
 
-            return inputStreamToString(urlConnection.getInputStream());
+            return Utils.inputStreamToString(urlConnection.getInputStream());
         } finally {
             urlConnection.disconnect();
         }
@@ -362,7 +351,7 @@ public class NeClient {
                         "Unexpected response: " + urlConnection.getResponseCode());
             }
 
-            return new JSONObject(inputStreamToString(urlConnection.getInputStream()));
+            return new JSONObject(Utils.inputStreamToString(urlConnection.getInputStream()));
         } finally {
             urlConnection.disconnect();
         }
@@ -454,7 +443,7 @@ public class NeClient {
                     throw new LoginException("Login failed");
                 }
 
-                return new JSONObject(inputStreamToString(urlConnection.getInputStream()));
+                return new JSONObject(Utils.inputStreamToString(urlConnection.getInputStream()));
             } finally {
                 urlConnection.disconnect();
             }
@@ -516,7 +505,7 @@ public class NeClient {
                     throw new LoginException("Login required");
                 }
 
-                return new JSONObject(inputStreamToString(urlConnection.getInputStream()));
+                return new JSONObject(Utils.inputStreamToString(urlConnection.getInputStream()));
             } finally {
                 urlConnection.disconnect();
             }
@@ -544,7 +533,7 @@ public class NeClient {
                     return false;
                 }
 
-                page = inputStreamToString(urlConnection.getInputStream());
+                page = Utils.inputStreamToString(urlConnection.getInputStream());
             } finally {
                 urlConnection.disconnect();
             }
