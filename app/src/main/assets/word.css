@@ -1,0 +1,53 @@
+p.headword {
+	display: none;
+}
+
+p.headword + p {
+	margin: 0;
+}
+
+p:nth-of-type(3) {
+	margin: 0;
+}
+
+object {
+	display: none;
+}
+
+.neopetit {
+	font-size: 90%;
+}
+
+.neokap {
+	color: darkslategray;
+	font-size: 80%;
+}
+
+br {
+	display: block;
+	margin-top: 0.25em;
+	content: ' ';
+}
+
+i {
+	color: darkolivegreen;
+}
+
+a {
+	text-decoration: none;
+	color: darkblue;
+}
+
+a.sound {
+	text-decoration: none;
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	background-image: url('file:///android_asset/audio.png');
+}
+
+a.normal {
+	text-decoration: inherit;
+	color: inherit;
+	cursor: default;
+}

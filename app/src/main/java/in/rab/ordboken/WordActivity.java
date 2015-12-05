@@ -55,30 +55,6 @@ import in.rab.ordboken.OrdbokenContract.HistoryEntry;
 
 public class WordActivity extends Activity {
     private static final String FLASHCARD_ACTION = "org.openintents.action.CREATE_FLASHCARD";
-    private static final String CSS = "<style>"
-            + "p.headword { display: none; }"
-            + "p.headword + p { margin: 0; }"
-            + "p:nth-of-type(3) { margin: 0; };"
-            + "object { display: none; }"
-            + ".neopetit { font-size: 90%; }"
-            + ".neokap { color: darkslategray; font-size: 80%; }"
-            + "br { display: block; margin-top: 0.25em; content: ' '; } "
-            + "i { color: darkolivegreen; }"
-            + "a {"
-            + " text-decoration: none;"
-            + " color: darkblue; "
-            + "}"
-            + "a.sound { "
-            + "	text-decoration: none;"
-            + "	width: 16px; height: 16px;"
-            + "	display: inline-block;"
-            + "	background-image: url('file:///android_asset/audio.png');"
-            + "}"
-            + "a.normal {"
-            + " text-decoration: inherit;"
-            + " color: inherit;"
-            + " cursor: default;"
-            + "}" + "</style>";
     private WebView mWebView;
     private Ordboken mOrdboken;
     private NeWord mWord;
@@ -172,7 +148,10 @@ public class WordActivity extends Activity {
 
     private void loadWebView(NeWord word) {
         String text = word.mText;
-        StringBuilder builder = new StringBuilder(CSS);
+        final String head = "<head>"
+                      + "<link rel='stylesheet' type='text/css' href='file:///android_asset/word.css'>"
+                      + "</head>";
+        StringBuilder builder = new StringBuilder(head);
         String javascript = "<script src='file:///android_asset/word.js'></script>";
 
         if (word.mHasAudio) {
@@ -388,8 +367,13 @@ public class WordActivity extends Activity {
 
         if (mWord != null) {
             Intent shareIntent = new Intent(FLASHCARD_ACTION);
+            StringBuilder builder = new StringBuilder();
+
+            builder.append("<style>").append(mOrdboken.getCSS()).append("</style>");
+            builder.append(mWord.mText);
+
             shareIntent.putExtra("SOURCE_TEXT", mWord.mTitle);
-            shareIntent.putExtra("TARGET_TEXT", CSS + mWord.mText);
+            shareIntent.putExtra("TARGET_TEXT", builder.toString());
             mShareActionProvider.setShareIntent(shareIntent);
         } else {
             mShareActionProvider.setShareIntent(null);

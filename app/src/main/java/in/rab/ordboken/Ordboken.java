@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.http.HttpResponseCache;
@@ -34,6 +35,7 @@ import android.widget.SearchView;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 
@@ -49,6 +51,7 @@ public class Ordboken {
     private NeWord mCurrentWord;
     private Where mLastWhere;
     private String mLastWhat;
+    private String mCSS;
 
     public enum Where {
         MAIN, WORD
@@ -218,5 +221,22 @@ public class Ordboken {
 
     public String getLastWhat() {
         return mLastWhat;
+    }
+
+    public String getCSS() {
+        if (mCSS != null) {
+            return mCSS;
+        }
+
+        AssetManager am = mContext.getAssets();
+
+        try {
+            InputStream is = am.open("word.css");
+            mCSS = Utils.inputStreamToString(is);
+        } catch (java.io.IOException e) {
+            mCSS = "";
+        }
+
+        return mCSS;
     }
 }
