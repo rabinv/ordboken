@@ -172,15 +172,17 @@ public class WordActivity extends Activity {
 
     private void loadWebView(NeWord word) {
         String text = word.mText;
+        StringBuilder builder = new StringBuilder(CSS);
         String javascript = "<script src='file:///android_asset/word.js'></script>";
 
         if (word.mHasAudio) {
             text = text.replace("</object>", "</object><a class='sound' href='/playAudio'></a>");
         }
 
+        builder.append(text);
+
         ArrayList<NeClient.NeSearchResult> relations = word.mRelations;
         if (relations.size() > 0) {
-            StringBuilder builder = new StringBuilder();
             int i;
 
             builder.append("<br><span class='neokap'>REL.:</span><span class='neopetit'>");
@@ -194,12 +196,12 @@ public class WordActivity extends Activity {
             }
 
             builder.append("</span>");
-
-            text += builder.toString();
         }
 
-        mWebView.loadDataWithBaseURL("http://api.ne.se/", CSS + text + javascript, "text/html",
-                "UTF-8", null);
+        builder.append(javascript);
+
+        mWebView.loadDataWithBaseURL("http://api.ne.se/", builder.toString(),
+                "text/html", "UTF-8", null);
     }
 
     private class WordTask extends AsyncTask<String, Void, NeWord> {
