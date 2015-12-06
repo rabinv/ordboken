@@ -153,10 +153,16 @@ public class WordActivity extends Activity {
             setTitle(title);
         }
 
+        String url = intent.getStringExtra("url");
+        if (url == null) {
+            return;
+        }
+
         try {
             mUrl = new URI(intent.getStringExtra("url")).toASCIIString();
         } catch (URISyntaxException e) {
             finish();
+            return;
         }
 
         fetchWord(null);
