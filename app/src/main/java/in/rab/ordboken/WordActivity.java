@@ -181,7 +181,7 @@ public class WordActivity extends Activity {
             text = text.replace("</object>", "</object><a class='sound' href='/playAudio'></a>");
         }
 
-        builder.append("<div id='bookmark'>★</div>");
+        builder.append("<div id='bookmark'>✹</div>");
         builder.append(text);
 
         ArrayList<NeClient.NeSearchResult> relations = word.mRelations;
