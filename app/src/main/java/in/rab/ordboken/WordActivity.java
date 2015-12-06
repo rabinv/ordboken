@@ -16,6 +16,7 @@
 
 package in.rab.ordboken;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentValues;
@@ -27,10 +28,13 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -66,8 +70,11 @@ public class WordActivity extends Activity {
     private ShareActionProvider mShareActionProvider;
     private SearchView mSearchView;
     private boolean mStarred;
+    private boolean mGotStarred;
+    private boolean mPageFinished;
 
     @Override
+    @SuppressLint("AddJavascriptInterface")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mOrdboken = Ordboken.getInstance(this);
@@ -82,6 +89,7 @@ public class WordActivity extends Activity {
         actionBar.setCustomView(R.layout.actionbar);
 
         mWebView = (WebView) findViewById(R.id.webView);
+        mWebView.setWebChromeClient(new WebChromeClient());
         WebSettings settings = mWebView.getSettings();
 
         settings.setBuiltInZoomControls(true);
@@ -115,7 +123,22 @@ public class WordActivity extends Activity {
 
                 return true;
             }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                mPageFinished = true;
+                updateStar();
+            }
         });
+
+        class OrdbokenJsObject {
+            @SuppressWarnings("unused")
+            @JavascriptInterface
+            public void toggleStar() {
+                new StarToggleTask().execute();
+            }
+        }
+        mWebView.addJavascriptInterface(new OrdbokenJsObject(), "ordboken");
 
         mStarred = false;
         mProgressBar = (ProgressBar) findViewById(R.id.word_progress);
@@ -158,6 +181,7 @@ public class WordActivity extends Activity {
             text = text.replace("</object>", "</object><a class='sound' href='/playAudio'></a>");
         }
 
+        builder.append("<div id='bookmark'>★</div>");
         builder.append(text);
 
         ArrayList<NeClient.NeSearchResult> relations = word.mRelations;
@@ -181,6 +205,16 @@ public class WordActivity extends Activity {
 
         mWebView.loadDataWithBaseURL("http://api.ne.se/", builder.toString(),
                 "text/html", "UTF-8", null);
+    }
+
+    private void updateStar() {
+        Integer on = mStarred ? 1 : 0;
+
+        if (!mGotStarred || !mPageFinished) {
+            return;
+        }
+
+        mWebView.loadUrl("javascript:setStar(" + on.toString() + ")");
     }
 
     private class WordTask extends AsyncTask<String, Void, NeWord> {
@@ -318,6 +352,8 @@ public class WordActivity extends Activity {
         @Override
         protected void onPostExecute(Boolean starred) {
             mStarred = starred;
+            mGotStarred = true;
+            updateStar();
             invalidateOptionsMenu();
         }
     }
