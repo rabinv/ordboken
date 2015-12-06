@@ -188,7 +188,7 @@ public class WordActivity extends Activity {
         if (relations.size() > 0) {
             int i;
 
-            builder.append("<br><span class='neokap'>REL.:</span><span class='neopetit'>");
+            builder.append("<p><span class='neokap'>REL?:</span><span class='neopetit'>");
 
             for (NeClient.NeSearchResult relation : relations) {
                 builder.append(" <a href='")
@@ -198,7 +198,7 @@ public class WordActivity extends Activity {
                         .append("</a>");
             }
 
-            builder.append("</span>");
+            builder.append("</span></p>");
         }
 
         builder.append(javascript);
