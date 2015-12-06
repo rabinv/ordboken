@@ -188,14 +188,17 @@ public class WordActivity extends Activity {
         if (relations.size() > 0) {
             int i;
 
-            builder.append("<p><span class='neokap'>REL?:</span><span class='neopetit'>");
+            builder.append("<p><span class='neokap'>REL?:</span><span class='neopetit'> ");
 
+            String seperator = "";
             for (NeClient.NeSearchResult relation : relations) {
-                builder.append(" <a href='")
+                builder.append(seperator)
+                        .append("<a href='")
                         .append(relation.mUrl)
                         .append("'>")
                         .append(relation.mTitle)
                         .append("</a>");
+                seperator = ", ";
             }
 
             builder.append("</span></p>");
