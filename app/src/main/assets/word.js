@@ -44,7 +44,9 @@ var createLinks = function(el) {
 	});
 };
 
-var ps = document.getElementsByTagName("p");
-for (var i = 0; i < ps.length; i++) {
-	createLinks(ps[i]);
-}
+$(function() {
+    var ps = document.getElementsByTagName("p");
+    for (var i = 0; i < ps.length; i++) {
+        createLinks(ps[i]);
+    }
+});

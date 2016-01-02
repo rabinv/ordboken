@@ -179,9 +179,10 @@ public class WordActivity extends Activity {
         String text = word.mText;
         final String head = "<head>"
                       + "<link rel='stylesheet' type='text/css' href='file:///android_asset/word.css'>"
+                      + "<script src='file:///android_asset/jquery.min.js'></script>"
+                      + "<script src='file:///android_asset/word.js'></script>"
                       + "</head>";
         StringBuilder builder = new StringBuilder(head);
-        String javascript = "<script src='file:///android_asset/word.js'></script>";
 
         if (word.mHasAudio) {
             text = text.replace("</object>", "</object><a class='sound' href='/playAudio'></a>");
@@ -209,8 +210,6 @@ public class WordActivity extends Activity {
 
             builder.append("</span></p>");
         }
-
-        builder.append(javascript);
 
         mWebView.loadDataWithBaseURL("http://api.ne.se/", builder.toString(),
                 "text/html", "UTF-8", null);
