@@ -66,3 +66,10 @@ a.normal {
 	color: white;
 	-webkit-text-stroke: 0.025em black;
 }
+
+ul.nyanser {
+	margin-top: 0;
+	padding-left: 0.15em;
+	margin-bottom: 0;
+	list-style-type: none;
+}

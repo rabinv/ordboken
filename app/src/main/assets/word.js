@@ -44,7 +44,49 @@ var createLinks = function(el) {
 	});
 };
 
+var createListEl = function(head, cls) {
+	// Wrap text nodes so that they get selected with e.g. nextAll()
+	head.parent().contents().filter(function(){
+		return this.nodeType === 3;
+	}).wrap('<span/>');
+
+	var regex = /^ *[a-z]\)$/
+	var items = head.nextAll('b').filter(function() {
+		return regex.test($(this).text());
+	});
+
+	var list = $('<ul class="' + cls + '">');
+	var listitems = [];
+
+	var start = head;
+	for (var i = 0; i < items.length; i++) {
+		var end = i + 1 == items.length ? 'br' : items[i + 1];
+
+		start = start.nextUntil(end)
+			.wrapAll('<li>')
+			.parent();
+		listitems.push(start);
+	}
+
+	for (var i = 0; i < listitems.length; i++) {
+		list.append(listitems[i]);
+	}
+	head.after(list);
+};
+
+var createList = function(title, cls) {
+	$("span:contains('" + title + "')").each(function() {
+		createListEl($(this), cls);
+	});
+};
+
+var createLists = function() {
+	createList('BET.NYANSER:', 'nyanser');
+};
+
 $(function() {
+    createLists();
+
     var ps = document.getElementsByTagName("p");
     for (var i = 0; i < ps.length; i++) {
         createLinks(ps[i]);
