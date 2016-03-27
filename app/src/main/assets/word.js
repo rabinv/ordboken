@@ -87,6 +87,10 @@ var createLists = function() {
 $(function() {
     createLists();
 
+    $("i:contains('~')").each(function() {
+        $(this).html($(this).html().replace(/~/g, document.title));
+    });
+
     var ps = document.getElementsByTagName("p");
     for (var i = 0; i < ps.length; i++) {
         createLinks(ps[i]);
