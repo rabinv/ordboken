@@ -180,14 +180,15 @@ public class WordActivity extends Activity {
         final String head = "<head>"
                       + "<link rel='stylesheet' type='text/css' href='file:///android_asset/word.css'>"
                       + "<script src='file:///android_asset/jquery.min.js'></script>"
-                      + "<script src='file:///android_asset/word.js'></script>"
-                      + "</head>";
+                      + "<script src='file:///android_asset/word.js'></script>";
         StringBuilder builder = new StringBuilder(head);
 
         if (word.mHasAudio) {
             text = text.replace("</object>", "</object><a class='sound' href='/playAudio'></a>");
         }
 
+        builder.append("<title>").append(word.mTitle).append("</title>");
+        builder.append("</head>");
         builder.append("<div id='bookmark'>✹</div>");
         builder.append(text);
 
