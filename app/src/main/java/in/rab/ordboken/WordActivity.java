@@ -137,6 +137,17 @@ public class WordActivity extends Activity {
             public void toggleStar() {
                 new StarToggleTask().execute();
             }
+
+            @SuppressWarnings("unused")
+            @JavascriptInterface
+            public void loaded() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mStatusLayout.setVisibility(View.GONE);
+                    }
+                });
+            }
         }
         mWebView.addJavascriptInterface(new OrdbokenJsObject(), "ordboken");
 
@@ -257,8 +268,6 @@ public class WordActivity extends Activity {
 
             loadWebView(result);
             setTitle(result.mTitle);
-            mStatusLayout.setVisibility(View.GONE);
-            mWebView.setVisibility(View.VISIBLE);
             updateShareIntent();
 
             new StarUpdateTask().execute();

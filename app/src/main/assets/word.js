@@ -95,4 +95,6 @@ $(function() {
     for (var i = 0; i < ps.length; i++) {
         createLinks(ps[i]);
     }
+
+    ordboken.loaded();
 });
