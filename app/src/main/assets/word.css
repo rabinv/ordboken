@@ -6,6 +6,13 @@ p.headword + p {
 	margin: 0;
 }
 
+p.rel {
+}
+
+p.dummy {
+    margin: 0;
+}
+
 object {
 	display: none;
 }

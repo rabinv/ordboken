@@ -205,7 +205,7 @@ public class WordActivity extends Activity {
 
         ArrayList<NeClient.NeSearchResult> relations = word.mRelations;
         if (relations.size() > 0) {
-            builder.append("<p><span class='neokap'>REL?:</span><span class='neopetit'> ");
+            builder.append("<p class='rel'><span class='neokap'>REL?:</span><span class='neopetit'> ");
 
             String seperator = "";
             for (NeClient.NeSearchResult relation : relations) {
