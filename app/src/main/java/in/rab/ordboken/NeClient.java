@@ -309,7 +309,7 @@ public class NeClient {
             IOException {
         Uri.Builder uriBuilder = Uri.parse("http://api.ne.se/search").buildUpon();
 
-        uriBuilder.appendQueryParameter("fq", "type:ordbok");
+        uriBuilder.appendQueryParameter("fq", "type_s:ordbok AND subtype_s:svensk");
         uriBuilder.appendQueryParameter("q", query);
         uriBuilder.appendQueryParameter("rows", Integer.toString(count));
 
