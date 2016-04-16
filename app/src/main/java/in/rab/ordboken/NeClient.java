@@ -193,7 +193,7 @@ public class NeClient {
             // Audio is marked by an object data with an asset number we apparently can't
             // do anything with. To actually get the audio, we need to screen scrape the
             // full site.
-            mHasAudio = mText.contains("<object data");
+            mHasAudio = false;
         }
     }
 
