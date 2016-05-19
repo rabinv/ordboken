@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.ListFragment;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import android.widget.SimpleCursorAdapter;
 import in.rab.ordboken.OrdbokenContract.HistoryEntry;
 
 public abstract class CommonListFragment extends ListFragment {
+    private Parcelable mState;
     private String mTable;
 
     public CommonListFragment(String table) {
@@ -35,6 +37,13 @@ public abstract class CommonListFragment extends ListFragment {
     public void onResume() {
         super.onResume();
         new HistoryTask().execute();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        mState = getListView().onSaveInstanceState();
     }
 
     protected abstract Cursor getCursor(SQLiteDatabase db);
@@ -57,6 +66,9 @@ public abstract class CommonListFragment extends ListFragment {
         @Override
         protected void onPostExecute(ListAdapter adapter) {
             setListAdapter(adapter);
+            if (mState != null) {
+                getListView().onRestoreInstanceState(mState);
+            }
         }
     }
 
