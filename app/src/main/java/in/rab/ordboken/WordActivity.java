@@ -28,6 +28,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -58,7 +59,6 @@ import in.rab.ordboken.OrdbokenContract.FavoritesEntry;
 import in.rab.ordboken.OrdbokenContract.HistoryEntry;
 
 public class WordActivity extends Activity {
-    private static final String FLASHCARD_ACTION = "org.openintents.action.CREATE_FLASHCARD";
     private WebView mWebView;
     private Ordboken mOrdboken;
     private NeWord mWord;
@@ -412,20 +412,54 @@ public class WordActivity extends Activity {
         }
     }
 
+    private String guessPos(String text) {
+        // https://spraakbanken.gu.se/swe/forskning/saldo/taggm%C3%A4ngd
+
+        if (text.contains("subst.")) {
+            return "nn";
+        } else if (text.contains("adj.")) {
+            return "av";
+        } else if (text.contains("verb")) {
+            return "vb";
+        } else if (text.contains("adv.")) {
+            return "ab";
+        } else if (text.contains("prep.")) {
+            return "pp";
+        } else if (text.contains("interj.")) {
+            return "in";
+        } else if (text.contains("pron.")) {
+            return "pn";
+        } else if (text.contains("konj.")) {
+            return "kn";
+        } else {
+            return null;
+        }
+    }
+
     private void updateShareIntent() {
         if (mShareActionProvider == null) {
             return;
         }
 
         if (mWord != null) {
-            Intent shareIntent = new Intent(FLASHCARD_ACTION);
+            Intent shareIntent = new Intent();
             StringBuilder builder = new StringBuilder();
+
+            shareIntent.setAction(Intent.ACTION_SEND);
 
             builder.append("<style>").append(mOrdboken.getCSS()).append("</style>");
             builder.append(mWord.mText);
 
-            shareIntent.putExtra("SOURCE_TEXT", mWord.mTitle);
-            shareIntent.putExtra("TARGET_TEXT", builder.toString());
+            String plainText = Html.fromHtml(mWord.mText).toString();
+            String pos = guessPos(plainText);
+
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, mWord.mTitle);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, plainText);
+            shareIntent.putExtra(Intent.EXTRA_HTML_TEXT, builder.toString());
+            if (pos != null) {
+                shareIntent.putExtra("in.rab.extra.pos", pos);
+            }
+            shareIntent.setType("text/plain");
             mShareActionProvider.setShareIntent(shareIntent);
         } else {
             mShareActionProvider.setShareIntent(null);
@@ -488,11 +522,9 @@ public class WordActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.word, menu);
 
-        if (getPackageManager().queryIntentActivities(new Intent(FLASHCARD_ACTION), 0).size() > 0) {
-            MenuItem shareItem = menu.findItem(R.id.menu_share);
-            shareItem.setVisible(true);
-            mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
-        }
+        MenuItem shareItem = menu.findItem(R.id.menu_share);
+        shareItem.setVisible(true);
+        mShareActionProvider = (ShareActionProvider) shareItem.getActionProvider();
 
         mSearchView = mOrdboken.initSearchView(this, menu, null, false);
         return true;
