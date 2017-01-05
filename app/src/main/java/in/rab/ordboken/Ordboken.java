@@ -78,6 +78,8 @@ public class Ordboken {
         mNeClient.setPersistentAuthData(mPrefs.getString("persistentAuthData", null));
         mNeClient.setUsername(mPrefs.getString("username", null));
         mNeClient.setPassword(mPrefs.getString("password", null));
+
+        initCookies();
     }
 
     public boolean isOnline() {

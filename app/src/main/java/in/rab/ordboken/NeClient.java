@@ -32,6 +32,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,6 +42,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class NeClient {
     private String mUsername;
     private String mPassword;
+    private static final Pattern MAIN_SITE_CONTENT_PATTERN = Pattern.compile("(<p class=\"headword\">([^<]+)</p>.*)<section class=\"section\">", Pattern.DOTALL);
     private final Authenticator authenticator;
 
     public enum Auth {
@@ -339,12 +342,47 @@ public class NeClient {
         }
     }
 
-    public NeWord fetchWord(String wordUrl) throws LoginException, ParserException, IOException {
-        try {
-            return new NeWord(wordUrl, privateApiRequest(wordUrl));
-        } catch (JSONException e) {
-            throw new ParserException(e.getMessage());
+    private JSONObject mainSiteToJson(String url)
+            throws LoginException, ParserException, IOException {
+        String page = fetchMainSitePage(url);
+
+        Matcher matcher = MAIN_SITE_CONTENT_PATTERN.matcher(page);
+        if (!matcher.find()) {
+            throw new ParserException("Could not find content");
         }
+
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("text", matcher.group(1));
+        map.put("slug", Uri.parse(url).getLastPathSegment());
+        map.put("title", matcher.group(2));
+
+        return new JSONObject(map);
+    }
+
+    public NeWord fetchWord(String wordUrl) throws LoginException, ParserException, IOException {
+        NeWord word = null;
+
+        try {
+            // Url starts with either http://api.ne.se/ordbok/svensk/ or http://api.ne.se/uppslagsverk/ordbok/svensk/,
+            // and we want http://www.ne.se/uppslagsverk/ordbok/svensk/
+            String mainSiteWordUrl = wordUrl
+                    .replace("http://api.ne.se/ordbok/svensk/", "http://api.ne.se/uppslagsverk/ordbok/svensk/")
+                    .replace("http://api.ne.se/", "http://www.ne.se/");
+
+            word = new NeWord(wordUrl, mainSiteToJson(mainSiteWordUrl));
+        } catch (Exception e) {
+            // This is only an optimization, so ignore any exceptions
+        }
+
+        if (word == null) {
+            try {
+                word = new NeWord(wordUrl, privateApiRequest(wordUrl));
+            } catch (JSONException e) {
+                throw new ParserException(e.getMessage());
+            }
+        }
+
+        return word;
     }
 
     private JSONObject publicApiRequest(String requestUrl) throws IOException, JSONException,
