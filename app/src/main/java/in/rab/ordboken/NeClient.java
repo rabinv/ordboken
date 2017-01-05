@@ -228,66 +228,75 @@ public class NeClient {
 
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(data);
 
-        URL url = new URL("https://auth.ne.se/login");
-        HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
-        https.setInstanceFollowRedirects(false);
-        https.setFixedLengthStreamingMode((int) entity.getContentLength());
-        https.setDoOutput(true);
+        // Get cookies
+        URL url = new URL("http://www.ne.se/login");
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setInstanceFollowRedirects(true);
 
         try {
-            OutputStream output = https.getOutputStream();
+            Integer response = urlConnection.getResponseCode();
+            if (response != 200) {
+                throw new LoginException("Unexpected response: " + response);
+            }
+        } finally {
+            urlConnection.disconnect();
+        }
+
+        urlConnection = (HttpURLConnection) new URL("http://auth.ne.se/login").openConnection();
+        urlConnection.setInstanceFollowRedirects(true);
+        urlConnection.setFixedLengthStreamingMode((int) entity.getContentLength());
+        urlConnection.setDoOutput(true);
+
+        try {
+            OutputStream output = urlConnection.getOutputStream();
             entity.writeTo(output);
             output.close();
 
-            Integer response = https.getResponseCode();
-            if (response != 302) {
+            Integer response = urlConnection.getResponseCode();
+            if (response != 200) {
                 throw new LoginException("Unexpected response: " + response);
             }
 
             // http://auth.ne.se/login?failed=true on failure
-            // http://auth.ne.se/ on success
-            String location = https.getHeaderField("Location");
-            if (location.contains("fail")) {
+            // http://www.ne.se/ on success
+            String location = urlConnection.getURL().toString();
+            if (location.contains("failed")) {
                 throw new LoginException("Failed to login");
             }
         } finally {
-            https.disconnect();
+            urlConnection.disconnect();
         }
     }
 
     private String fetchMainSitePage(String pageUrl) throws IOException, LoginException,
             ParserException {
         URL url = new URL(pageUrl);
-        HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         urlConnection.setInstanceFollowRedirects(false);
         urlConnection.connect();
-
+        String page;
         int response;
 
         try {
             response = urlConnection.getResponseCode();
+            page = Utils.inputStreamToString(urlConnection.getInputStream());
         } catch (IOException e) {
             urlConnection.disconnect();
             throw e;
         }
 
-        if (response == 302) {
+        if (response == 302 || page.contains("Logga in")) {
             urlConnection.disconnect();
-
-            try {
-                loginMainSite();
-            } catch (EOFException e) {
-                // Same EOFException as on token refreshes. Seems to be a POST thing.
-                loginMainSite();
-            }
+            loginMainSite();
 
             url = new URL(pageUrl);
-            urlConnection = (HttpsURLConnection) url.openConnection();
+            urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setInstanceFollowRedirects(false);
             urlConnection.connect();
 
             try {
                 response = urlConnection.getResponseCode();
+                page = Utils.inputStreamToString(urlConnection.getInputStream());
             } catch (IOException e) {
                 urlConnection.disconnect();
                 throw e;
@@ -295,11 +304,11 @@ public class NeClient {
         }
 
         try {
-            if (response != 200) {
+            if (response != 200 || page.contains("Logga in")) {
                 throw new ParserException("Unable to get page: " + response);
             }
 
-            return Utils.inputStreamToString(urlConnection.getInputStream());
+            return page;
         } finally {
             urlConnection.disconnect();
         }
